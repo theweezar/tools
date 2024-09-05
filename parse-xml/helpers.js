@@ -33,9 +33,9 @@ function buildXML(xmlObj) {
  * @param {string|null|undefined} exportFileName - Export file name
  */
 function exportXml(originFilePath, xml, exportFileName) {
-    const split = originFilePath.split('/');
+    const split = originFilePath.split('\\');    
     const fileName = split.pop();
-    const folder = split.join('/');
+    const folder = split.join('\\');
     const exportFolderPath = path.join(folder, 'export');
     const exportFilePath = exportFileName && typeof exportFileName === 'string'
         ? path.join(folder, 'export', exportFileName)
@@ -46,6 +46,8 @@ function exportXml(originFilePath, xml, exportFileName) {
     }
     
     fs.writeFileSync(exportFilePath, xml);
+    console.log(`Export to folder: ${exportFolderPath}`);
+    console.log(`Write to file: ${exportFilePath}`);
 }
 
 module.exports = {

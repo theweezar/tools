@@ -22,7 +22,7 @@ async function main() {
     fullXmlObj['customer-list']['customer'] = filteredCustomers;
 
     const finalXml = helpers.buildXML(fullXmlObj);
-    helpers.exportXml(relativeFilePath, finalXml, '20240831_defaultpwd_MonoLipaultSG.xml');
+    helpers.exportXml(xmlPath, finalXml, '20240831_defaultpwd_MonoLipaultSG.xml');
 };
 
 main();
