@@ -53,7 +53,9 @@ const remove = (source, path) => {
  * @returns {*} - any value
  */
 const getProp = (source, path) => {
-    let cloneObj = source ? JSON.parse(JSON.stringify(source)) : null;
+    if (!source || !path) return null;
+
+    let cloneObj = source;
     let props = path.split('.');
     if (cloneObj) while (props.length) {
         let prop = props.shift();
