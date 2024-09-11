@@ -7,9 +7,9 @@ const dot = require('./dot');
 const cwd = process.cwd();
 
 const config = {
-    source: 'ignore/20240909_dev_content-assets_SamsoniteSharedLibrary.xml',
+    source: 'ignore/20240905_library_SamsoniteSharedLibrary.xml',
     assetID: {
-        'footer-copy-include-workaround': ['ja-JP']
+        'footer-copy-include-workaround': ['ja-JP', 'en-AU']
     },
     exportPattern: 'samae-580_in-homepage-revamp_footer-content'
 };
@@ -51,13 +51,22 @@ async function main() {
     const fullXmlObj = await helpers.xmlToJSON(xmlPath);
     const contentMapByID = createContentMapByID(fullXmlObj);
 
-    Object.keys(config.assetID).forEach(ID => {
+    const filteredContents = Object.keys(config.assetID).map(ID => {
         const asset = contentMapByID[ID];
         const locale = config.assetID[ID];
-        let filteredCustomAttrs = filterCustomAttrBasedOnLocale(asset, locale);
+        const filteredCustomAttrs = filterCustomAttrBasedOnLocale(asset, locale);
 
-        console.log(filteredCustomAttrs);
+        dot.set(asset, 'custom-attributes.0.custom-attribute', filteredCustomAttrs);
+
+        return asset;
     });
+
+    fullXmlObj.library.content = filteredContents;
+    if (fullXmlObj.library.folder) delete fullXmlObj.library.folder;
+
+    const finalXml = helpers.buildXML(fullXmlObj);
+    const date = moment().format('YYYYMMDDkkmmss');
+    helpers.exportXml(xmlPath, finalXml, `${date}_${config.exportPattern}.xml`);
 }
 
 main();
