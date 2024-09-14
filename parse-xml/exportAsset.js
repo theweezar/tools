@@ -9,11 +9,31 @@ const cwd = process.cwd();
 const config = {
     source: 'ignore/20240905_library_SamsoniteSharedLibrary.xml',
     assetID: {
-        'footer-copy-include-workaround': ['ja-JP', 'en-AU']
+        'footer-copy-include-workaround': ['ja-JP', 'en-AU'],
+        'footer-newsletter-revamp-2024': ['en-AU'],
+        'footer-other-brands-revamp-2024': ['en-AU'],
+        'footer-support-revamp-2024': ['en-AU'],
+        'footer-about-revamp-2024': ['en-AU'],
+        'footer-account-revamp-2024': ['en-AU'],
+        'footer-social-revamp-2024': ['en-AU'],
+        'footer-column-m-revamp-2024': ['en-AU'],
+        'footer-copy-revamp-2024': ['en-AU'],
+        'footer-copy-include-workaround': ['en-AU'],
+        'experience-product-luggage': ['en-AU'],
+        'homepage-recommendation-third': ['en-AU'],
+        'homepage-recommendation-fourth': ['en-AU'],
+        'new-mobile-footer-menu-revamp-2024': ['en-AU'],
+        'home-instagram-revamp-2024': ['en-AU'],
+        'home-why-shop-with-us-revamp-2024': ['en-AU']
     },
     exportPattern: 'samae-580_in-homepage-revamp_footer-content'
 };
 
+/**
+ * Create a content assets mapping object with content ID is the key
+ * @param {Object} xmlObj - XML Object
+ * @returns {Object} - A content assets mapping object with content ID is the key
+ */
 function createContentMapByID(xmlObj) {
     const objWithContentIDAsKey = {};
     const contentArray = xmlObj && xmlObj.library && xmlObj.library.content;
@@ -46,27 +66,48 @@ function filterCustomAttrBasedOnLocale(asset, localeArr) {
     return finalCustomAttrs;
 }
 
+function proceedToFilterAsset(xmlObj) {
+    const contentMapByID = createContentMapByID(xmlObj);
+    return Object.keys(config.assetID).map(ID => {
+        const asset = contentMapByID[ID];
+        const locale = config.assetID[ID];
+
+        if (asset && locale) {
+            const filteredCustomAttrs = filterCustomAttrBasedOnLocale(asset, locale);
+            dot.set(asset, 'custom-attributes.0.custom-attribute', filteredCustomAttrs);
+            return asset;
+        }
+
+        return null;
+    }).filter(asset => {
+        return asset !== null;
+    });
+}
+
+/**
+ * Proceed to export XML file
+ * @param {string} xmlSourcePath - XML source relative/abs path
+ * @param {Object} xmlObj - XML Object
+ * @param {Array} contentArray - New content array after the process
+ */
+function proceedToExportXml(xmlSourcePath, xmlObj, contentArray) {
+    xmlObj.library.content = contentArray;
+    if (xmlObj.library.folder) delete xmlObj.library.folder;
+
+    const finalXml = helpers.buildXML(xmlObj);
+    const date = moment().format('YYYYMMDDkkmmss');
+    helpers.exportXml(xmlSourcePath, finalXml, `${date}_${config.exportPattern}.xml`);
+}
+
 async function main() {
     const xmlPath = path.join(cwd, config.source);
     const fullXmlObj = await helpers.xmlToJSON(xmlPath);
-    const contentMapByID = createContentMapByID(fullXmlObj);
+    const filteredContents = proceedToFilterAsset(fullXmlObj);
 
-    const filteredContents = Object.keys(config.assetID).map(ID => {
-        const asset = contentMapByID[ID];
-        const locale = config.assetID[ID];
-        const filteredCustomAttrs = filterCustomAttrBasedOnLocale(asset, locale);
+    proceedToExportXml(xmlPath, fullXmlObj, filteredContents);
 
-        dot.set(asset, 'custom-attributes.0.custom-attribute', filteredCustomAttrs);
-
-        return asset;
-    });
-
-    fullXmlObj.library.content = filteredContents;
-    if (fullXmlObj.library.folder) delete fullXmlObj.library.folder;
-
-    const finalXml = helpers.buildXML(fullXmlObj);
-    const date = moment().format('YYYYMMDDkkmmss');
-    helpers.exportXml(xmlPath, finalXml, `${date}_${config.exportPattern}.xml`);
+    console.log(`Request to export ${Object.keys(config.assetID).length} content(s).`);
+    console.log(`Exported ${filteredContents.length} content(s).`);
 }
 
 main();
