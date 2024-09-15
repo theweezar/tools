@@ -82,4 +82,6 @@ function execute(defaultSendFn) {
     alert('CURL connector is initialized.');
 }
 
-execute(window.XMLHttpRequest.prototype.send);
+if (!window.curlConnectorInitialized) {
+    execute(window.XMLHttpRequest.prototype.send);
+}
