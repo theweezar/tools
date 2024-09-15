@@ -4,7 +4,8 @@
   "description": "CURL Downloader",
   "main": "remote.js",
   "scripts": {
-    "remote": "nodemon remote"
+    "remote:fb": "nodemon remote 3103",
+    "remote:x": "nodemon remote 7346"
   },
   "author": "DucHoang",
   "license": "ISC",

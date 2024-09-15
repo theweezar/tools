@@ -11,6 +11,8 @@ async function getTabModel() {
 async function initConnector() {
     const tabModel = await getTabModel();
 
+    console.log(tabModel);
+
     if (!tabModel || !tabModel.tab) return;
 
     const exe = await chrome.scripting.executeScript({
