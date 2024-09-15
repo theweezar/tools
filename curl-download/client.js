@@ -7,11 +7,4 @@
     console.log(imgList);
 })();
 
-(function (send) {
-    XMLHttpRequest.prototype.send = function () {
-        this.addEventListener('load', function () {
-            console.log(this.responseText);
-        });
-        return send.apply(this, arguments);
-    };
-})(XMLHttpRequest.prototype.send);
+

@@ -1,9 +1,9 @@
 'use strict';
 
-const child_process = require('child_process');
 const shell = require('shelljs');
 const path = require('path');
 const fs = require('fs');
+const cmd = require('./helpers/cmd');
 const cwd = process.cwd();
 
 const config = (() => {
@@ -27,39 +27,22 @@ const config = (() => {
     };
 })();
 
-function runCmd(cmd) {
-    try {
-        let resp = child_process.execSync(cmd);
-        let result = resp.toString('UTF8');
-        return result;
-    } catch (error) {}
-}
-
+/**
+ * Create folder if not exist
+ */
 function mkDirIfNotExist() {
     if (!fs.existsSync(config.outputPath)) {
         fs.mkdirSync(config.outputPath);
     }
 }
 
+/**
+ * Get all file name in output folder
+ * @returns {Array} - file name array
+ */
 function getFilesInOuputDir() {
     const files = shell.ls(config.outputPath);
     return files.map(file => file);
-}
-
-function exeCurl(link, output) {
-    let params = {
-        '-o': output,
-        '\0': link
-    };
-    let query = Object.keys(params).reduce((currentValue, element) => {
-        let copied = currentValue;
-        if (element === '\0') copied += ` ${params[element]}`;
-        else copied += `${element} ${params[element]}`;
-        return copied;
-    }, '');
-    let cmd = `curl ${query}`;
-    console.log(cmd);
-    runCmd(cmd);
 }
 
 function execute() {
@@ -70,7 +53,7 @@ function execute() {
 
     config.entries.forEach(entryModel => {
         if (!fileNames.includes(entryModel.fileName)) {
-            exeCurl(
+            cmd.exeCurl(
                 entryModel.fullPath,
                 path.join(config.outputPath, entryModel.fileName)
             );
