@@ -1,8 +1,8 @@
 'use strict';
 
 const path = require('path');
-const moment = require('moment');
-const helpers = require('./helpers');
+const helpers = require('./helpers/helpers');
+const assetHelpers = require('./helpers/assetHelpers');
 const cwd = process.cwd();
 
 const CONFIG = {
@@ -12,18 +12,6 @@ const CONFIG = {
     ],
     EXPORT_PATTERN: 'export-page'
 };
-
-function createContentMapByID(xmlObj) {
-    const objWithContentIDAsKey = {};
-    const contentArray = xmlObj && xmlObj.library && xmlObj.library.content;
-    if (Array.isArray(contentArray)) {
-        contentArray.forEach(content => {
-            let id = content.$ && content.$['content-id'];
-            if (id) objWithContentIDAsKey[id] = content;
-        });
-    }
-    return objWithContentIDAsKey;
-}
 
 function getContentLinkIDs(content) {
     const contentLinks = content && content['content-links'] && content['content-links'][0] && content['content-links'][0]['content-link'];
@@ -41,7 +29,7 @@ function getContentLinkIDs(content) {
  * @returns {Array} - Content array
  */
 function extractRelatedContent(xmlObj) {
-    const contentMapByID = createContentMapByID(xmlObj);
+    const contentMapByID = assetHelpers.createContentMapByID(xmlObj);
     let relatedContentIDs = [].concat(CONFIG.PAGE_ID);
 
     for (let i = 0; i < relatedContentIDs.length; i++) {
@@ -63,14 +51,9 @@ async function main() {
     const fullXmlObj = await helpers.xmlToJSON(xmlPath);
     const relatedContents = extractRelatedContent(fullXmlObj);
 
-    console.log(`Related content amount: ${relatedContents.length}`);
+    assetHelpers.proceedToExportXml(xmlPath, CONFIG.EXPORT_PATTERN, fullXmlObj, relatedContents, null);
 
-    fullXmlObj.library.content = relatedContents;
-    if (fullXmlObj.library.folder) delete fullXmlObj.library.folder;
-
-    const finalXml = helpers.buildXML(fullXmlObj);
-    const date = moment().format('YYYYMMDDkkmmss');
-    helpers.exportXml(xmlPath, finalXml, `${date}_${CONFIG.EXPORT_PATTERN}.xml`);
+    console.log(`Exported ${CONFIG.PAGE_ID.length} page(s) with ${relatedContents.length} content(s).`);
 }
 
 main();

@@ -46,8 +46,8 @@ function exportXml(originFilePath, xml, exportFileName) {
     }
     
     fs.writeFileSync(exportFilePath, xml);
-    console.log(`Export to folder: ${exportFolderPath}`);
-    console.log(`Write to file: ${exportFilePath}`);
+    console.log(`Exported to folder: ${exportFolderPath}`);
+    console.log(`Wrote to file: ${exportFilePath}`);
 }
 
 module.exports = {
