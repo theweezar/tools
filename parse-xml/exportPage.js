@@ -5,12 +5,12 @@ const helpers = require('./helpers/helpers');
 const assetHelpers = require('./helpers/assetHelpers');
 const cwd = process.cwd();
 
-const CONFIG = {
-    SOURCE: 'ignore/20240905_library_SamsoniteSharedLibrary.xml',
-    PAGE_ID: [
+const config = {
+    source: 'ignore/20240905_library_SamsoniteSharedLibrary.xml',
+    pageIDs: [
         'jp-homepage-revamp'
     ],
-    EXPORT_PATTERN: 'export-page'
+    exportPattern: 'export-page'
 };
 
 function getContentLinkIDs(content) {
@@ -30,7 +30,7 @@ function getContentLinkIDs(content) {
  */
 function extractRelatedContent(xmlObj) {
     const contentMapByID = assetHelpers.createContentMapByID(xmlObj);
-    let relatedContentIDs = [].concat(CONFIG.PAGE_ID);
+    let relatedContentIDs = [].concat(config.pageIDs);
 
     for (let i = 0; i < relatedContentIDs.length; i++) {
         const contentID = relatedContentIDs[i];
@@ -47,13 +47,13 @@ function extractRelatedContent(xmlObj) {
 }
 
 async function main() {
-    const xmlPath = path.join(cwd, CONFIG.SOURCE);
+    const xmlPath = path.join(cwd, config.source);
     const fullXmlObj = await helpers.xmlToJSON(xmlPath);
     const relatedContents = extractRelatedContent(fullXmlObj);
 
-    assetHelpers.proceedToExportXml(xmlPath, CONFIG.EXPORT_PATTERN, fullXmlObj, relatedContents, null);
+    assetHelpers.proceedToExportXml(xmlPath, config.exportPattern, fullXmlObj, relatedContents, null);
 
-    console.log(`Exported ${CONFIG.PAGE_ID.length} page(s) with ${relatedContents.length} content(s).`);
+    console.log(`Exported ${config.pageIDs.length} page(s) with ${relatedContents.length} content(s).`);
 }
 
 main();

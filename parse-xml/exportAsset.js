@@ -8,7 +8,7 @@ const cwd = process.cwd();
 
 const config = {
     source: 'ignore/20240905_library_SamsoniteSharedLibrary.xml',
-    assetID: {
+    assetIDs: {
         'footer-copy-include-workaround': ['ja-JP', 'en-AU'],
         'footer-newsletter-revamp-2024': ['en-AU'],
         'footer-other-brands-revamp-2024': ['en-AU'],
@@ -51,11 +51,11 @@ function filterCustomAttrBasedOnLocale(asset, localeArr) {
 
 function proceedToFilterAsset(xmlObj) {
     const contentMapByID = assetHelpers.createContentMapByID(xmlObj);
-    return Object.keys(config.assetID).map(ID => {
+    return Object.keys(config.assetIDs).map(ID => {
         const asset = contentMapByID[ID];
-        const locale = config.assetID[ID];
+        const locale = config.assetIDs[ID];
 
-        if (asset && locale) {
+        if (asset && Array.isArray(locale)) {
             const filteredCustomAttrs = filterCustomAttrBasedOnLocale(asset, locale);
             dot.set(asset, 'custom-attributes.0.custom-attribute', filteredCustomAttrs);
             return asset;
@@ -74,7 +74,7 @@ async function main() {
 
     assetHelpers.proceedToExportXml(xmlPath, config.exportPattern, fullXmlObj, filteredContents, null);
 
-    console.log(`Request to export ${Object.keys(config.assetID).length} content(s).`);
+    console.log(`Request to export ${Object.keys(config.assetIDs).length} content(s).`);
     console.log(`Exported ${filteredContents.length} content(s).`);
 }
 
