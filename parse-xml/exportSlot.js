@@ -2,18 +2,22 @@
 
 const path = require('path');
 const moment = require('moment');
-const helpers = require('./helpers');
+const helpers = require('./helpers/helpers');
 const dot = require('./dot');
 const cwd = process.cwd();
 
 const CONFIG = {
-    SOURCE: 'ignore/20240908_dev_content-slots.xml',
+    SOURCE: 'ignore/20240918_dev_atph_content-slots.xml',
     SLOT_ID: [
-        'experience-product-best-seller',
-        'experience-product-new',
+        'home-revamp-products-m',
+        'home-revamp-products-r',
+        'home-revamp-products-w',
+        'home-revamp-product-best-sellers',
+        'new-header-menu',
+        'footer-column-m-revamp'
     ],
     CONFIGURATION_ID: [],
-    EXPORT_PATTERN: 'export-slot'
+    EXPORT_PATTERN: 'SAMAE-600_ph-content-slots'
 };
 
 /**

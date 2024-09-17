@@ -7,26 +7,18 @@ const dot = require('./dot');
 const cwd = process.cwd();
 
 const config = {
-    source: 'ignore/20240905_library_SamsoniteSharedLibrary.xml',
+    source: 'ignore/20240917_dev_AmericanTouristerSharedLibrary.xml',
     assetIDs: {
-        'footer-copy-include-workaround': ['ja-JP', 'en-AU'],
-        'footer-newsletter-revamp-2024': ['en-AU'],
-        'footer-other-brands-revamp-2024': ['en-AU'],
-        'footer-support-revamp-2024': ['en-AU'],
-        'footer-about-revamp-2024': ['en-AU'],
-        'footer-account-revamp-2024': ['en-AU'],
-        'footer-social-revamp-2024': ['en-AU'],
-        'footer-column-m-revamp-2024': ['en-AU'],
-        'footer-copy-revamp-2024': ['en-AU'],
-        'footer-copy-include-workaround': ['en-AU'],
-        'experience-product-luggage': ['en-AU'],
-        'homepage-recommendation-third': ['en-AU'],
-        'homepage-recommendation-fourth': ['en-AU'],
-        'new-mobile-footer-menu-revamp-2024': ['en-AU'],
-        'home-instagram-revamp-2024': ['en-AU'],
-        'home-why-shop-with-us-revamp-2024': ['en-AU']
+        "homepage-revamp-stay-social": ["*"],
+        "home-revamp-why-shop-with-us": ["*"],
+        "home-revamp-brand-story": ["*"],
+        "homepage-revamp-css": ["*"],
+        "homepage-revamp-whats-new": ["*"],
+        "header-menu-content-revamp": ["*"],
+        "footer-column-m-revamp": ["*"],
+        "email-subscription-revamp": ["*"]
     },
-    exportPattern: 'samae-580_au-homepage-revamp_footer-content'
+    exportPattern: 'SAMAE-600_AmericanTouristerSharedLibrary'
 };
 
 /**
@@ -39,10 +31,17 @@ function filterCustomAttrBasedOnLocale(asset, localeArr) {
     let finalCustomAttrs = [];
 
     if (Array.isArray(customAttrs)) {
-        let filteredCustomAttrs = customAttrs.filter(attrXml => {
-            const xmlLang = attrXml && attrXml.$ && attrXml.$['xml:lang'];
-            return localeArr.includes(xmlLang);
-        });
+        let filteredCustomAttrs;
+
+        if (localeArr.includes('*')) {
+            filteredCustomAttrs = customAttrs;
+        } else {
+            filteredCustomAttrs = customAttrs.filter(attrXml => {
+                const xmlLang = attrXml && attrXml.$ && attrXml.$['xml:lang'];
+                return localeArr.includes(xmlLang);
+            });
+        }
+
         finalCustomAttrs = finalCustomAttrs.concat(filteredCustomAttrs);
     }
 

@@ -6,11 +6,11 @@ const assetHelpers = require('./helpers/assetHelpers');
 const cwd = process.cwd();
 
 const config = {
-    source: 'ignore/20240905_library_SamsoniteSharedLibrary.xml',
+    source: 'ignore/20240917_dev_AmericanTouristerSharedLibrary.xml',
     pageIDs: [
-        'jp-homepage-revamp'
+        'ph-homepage-revamp'
     ],
-    exportPattern: 'export-page'
+    exportPattern: 'SAMAE-600_ph-homepage-revamp'
 };
 
 function getContentLinkIDs(content) {
