@@ -1,6 +1,7 @@
 {
-    "output": "../ignore/curl",
+    "output": "./ignore/curl/patreon",
     "entries": [
-        ""
-    ]
+        "https://www.patreon.com/file?h=105362660&m=313560014"
+    ],
+    "type": "patreon"
 }
