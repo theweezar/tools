@@ -1,7 +1,6 @@
 {
-    "output": "./ignore/curl/patreon",
+    "output": "./ignore/curl/patreon/pack_4",
     "entries": [
-        "https://www.patreon.com/file?h=105362660&m=313560014"
     ],
     "type": "patreon"
 }
