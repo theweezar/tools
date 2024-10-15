@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const cmd = require('./helpers/cmd');
 const { default: axios } = require('axios');
+const { default: strings } = require('@supercharge/strings');
 const cwd = process.cwd();
 
 const config = (() => {
@@ -58,13 +59,19 @@ function executePatreonDownloader() {
         let exposedHeader = res.request._header;
         let split = typeof exposedHeader === 'string' ? exposedHeader.split(/GET ([^]*) HTTP\/1.1(?:[^]*)/g) : [];
         let endpoint = split.length >= 2 ? split[1] : '';
+        let contentType = res.headers['Content-Type'];
+        let contentDisposition = res.headers['content-disposition'];
+        let fileExt = String(contentType).split('/').pop() || 'png';
+        let fileName = (contentDisposition && typeof contentDisposition === 'string' && contentDisposition.split(/filename="([^"]*)"/g)[1])
+                || `${strings.random(16)}.${fileExt}`;
 
-        console.log(res);
-
-        if (endpoint !== '') {
+        if (endpoint) {
             let baseUrl = new URL('https://c10.patreonusercontent.com');
             let mediaUrl = new URL(endpoint, baseUrl);
-            // console.log(mediaUrl);
+            cmd.exeCurl(
+                mediaUrl.href,
+                path.join(config.outputPath, fileName)
+            );
         }
     });
 }
