@@ -6,41 +6,33 @@ const path = require('path');
 
 /** Scripts, variables */
 const cwd = process.cwd();
-const keyPath = path.join(cwd, 'ignore/binance_connector_key.json');
 const csvPath = path.join(cwd, 'ignore/binance');
 const symbol = require('./config/symbol.json');
+const key = require('./config/credentials.json');
 const Klines = require('./models/klines');
 const CSV = require('./scripts/csv');
-let key;
 
-/** Try to get key */
-try {
-    key = require(keyPath);
-    if (!key || !key.apiKey || !key.secretKey) {
-        throw new Error('Key not found');
-    }
-} catch (error) {
-    process.exit(1);
+if (!key || !key.apiKey || !key.secretKey) {
+    throw new Error('Key not found');
 }
 
 const execute = async () => {
     const client = new binance.USDMClient({
         api_key: key.apiKey,
-        api_secret: key.secretKey,
-        limit: 1000
+        api_secret: key.secretKey
     });
 
     // https://developers.binance.com/docs/binance-spot-api-docs/rest-api/public-api-endpoints#klinecandlestick-data
     const params = {
         symbol: symbol.XRP,
-        interval: '15m'
+        interval: '5m'
     };
     const klineData = await client.getKlines(params).catch(error => {
         console.error(error);
     });
 
     if (klineData) {
-        const csvFileName = `binance_${params.symbol.toLocaleLowerCase()}.csv`;
+        const csvFileName = `binance_${params.symbol}_${params.interval}.csv`;
 
         /** @type {Array} */
         const klines = new Klines(klineData);
