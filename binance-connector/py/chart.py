@@ -24,10 +24,10 @@ class Chart:
         return self
 
     def show_standard_chart(self):
-        self.plt.plot(self.initial_nd_array, label="Prices")
-        self.plt.set_xlabel("Timestamps (Index)")
+        self.plt.plot(self.x_nd_timestamps, self.initial_nd_array, label="Prices")
+        self.plt.set_xlabel(f"Timestamps (Index) - Last price: {self.initial_nd_array[-1]}")
         self.plt.set_ylabel("Price")
-        self.plt.grid()
+        self.plt.grid(linestyle='--')
         self.plt.legend()
         return self
 
@@ -41,8 +41,13 @@ class Chart:
         self.plt.plot(self.x_nd_timestamps, rsi_nd_array, label="RSI")
         self.plt.plot(self.x_nd_timestamps, upper, color="blue")
         self.plt.plot(self.x_nd_timestamps, lower, color="blue")
-        self.plt.set_xlabel(f"RSI({period})")
+        self.plt.set_xlabel(f"RSI({period}): {round(rsi_nd_array[-1], 2)}")
         self.plt.set_ylabel("Index")
+        self.plt.set_ylim(ymin=0, ymax=100)
+        self.plt.grid(linestyle='--')
+
+        y_ticks = [i*10 for i in range(11)]
+        self.plt.set_yticks(y_ticks)
 
         self.current_nd_array = rsi_nd_array
         return self

@@ -6,7 +6,7 @@ const path = require('path');
 
 /** Scripts, variables */
 const cwd = process.cwd();
-const csvPath = path.join(cwd, 'ignore/binance');
+const csvPath = process.argv[2] ? path.join(cwd, process.argv[2]) : path.join(cwd, 'binance-connector/ignore');
 const symbol = require('./config/symbol.json');
 const key = require('./config/credentials.json');
 const Klines = require('./models/klines');
@@ -24,7 +24,7 @@ const execute = async () => {
 
     // https://developers.binance.com/docs/binance-spot-api-docs/rest-api/public-api-endpoints#klinecandlestick-data
     const params = {
-        symbol: symbol.XRP,
+        symbol: symbol.BTC,
         interval: '5m'
     };
     const klineData = await client.getKlines(params).catch(error => {

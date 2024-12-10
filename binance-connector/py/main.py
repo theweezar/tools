@@ -1,14 +1,25 @@
 import numpy as np
 import pandas
 import os
+import re
 from view import View
 
-# Read CSV or fetch data from API
-cwd = os.getcwd()
-csv_path = os.path.join(cwd, "ignore", "binance", "export_20241209233803_binance_BTCUSDT_5m.csv")
-frame = pandas.read_csv(csv_path, sep=",")
+def get_csv_frame():
+    cwd = os.getcwd()
+    csv_folder_path = os.path.join(cwd, "binance-connector", "ignore")
+    files = [f for f in os.listdir(csv_folder_path) if os.path.isfile(os.path.join(csv_folder_path, f))]
+
+    if len(files) == 0:
+        raise Exception("Data not found.")
+
+    if re.search("(.csv$)", files[0]) is None:
+        raise Exception("CSV file not found")
+
+    csv_file_path = os.path.join(cwd, "binance-connector", "ignore", files[0])
+    return pandas.read_csv(csv_file_path, sep=",")
 
 # Initial price data
+frame = get_csv_frame()
 y_prices = np.array(frame['Close Price'])
 
 # Plot 2 charts, plot the prices and the trendline

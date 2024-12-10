@@ -1,11 +1,5 @@
-import matplotlib.pyplot as plt
+import re
 
-f, axs = plt.subplots(2, 1, sharex='col', layout='constrained')
+x = re.search("(.csv$)", "export_20241210223933_binance_BTCUSDT_5m.csv")
 
-print(type(axs[0]))
-
-import numpy as np
-
-a = np.array([])
-
-print(type(a))
+print(x)
