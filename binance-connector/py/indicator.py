@@ -1,5 +1,4 @@
 import pandas
-import os
 import math
 
 def calc_rsi(prices: pandas.Series, period: int):
