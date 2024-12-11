@@ -7,6 +7,7 @@ class View:
         f, axs = plt.subplots(number_of_chart, 1, sharex='col', layout='constrained', figsize=(10, 6))
         self.number_of_chart = number_of_chart
         self.charts = []
+        self.figure = f
 
         for i in range(number_of_chart):
             new_chart = Chart(axs[i])

@@ -23,9 +23,9 @@ class Chart:
         self.plt.plot(self.x_nd_timestamps, trendline, color="red", linestyle="--")
         return self
 
-    def show_chart(self, ylabel="Price"):
+    def show_chart(self, xlabel="Last", ylabel="Price"):
         self.plt.plot(self.x_nd_timestamps, self.initial_nd_array)
-        self.plt.set_xlabel(f"Last: {self.initial_nd_array[-1]}")
+        self.plt.set_xlabel(f"{xlabel}: {self.initial_nd_array[-1]}")
         self.plt.set_ylabel(ylabel)
         self.plt.grid(linestyle='--')
         return self
