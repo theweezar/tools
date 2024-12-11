@@ -1,8 +1,10 @@
+import numpy as np
 import pandas
 import math
 
 def calc_rsi(prices: pandas.Series, period: int):
-    """ Calculate RSI
+    """
+    Calculate RSI
 
     Args:
         prices (Series): Close price series
@@ -36,3 +38,23 @@ def calc_rsi(prices: pandas.Series, period: int):
     rsi = rsi.map(lambda val: 50 if math.isnan(val) else val)
 
     return rsi
+
+def calc_ema(prices, period):
+    """
+    Calculate the Exponential Moving Average (EMA) for a given dataset.
+    
+    Args:
+        prices (list or pandas.Series): List of price data (closing prices).
+        period (int): The number of periods for the EMA.
+    
+    Returns:
+        pandas.Series: EMA values for the given price data.
+    """
+    # Convert prices to a pandas Series if it's not already
+
+    this_prices = pandas.Series(prices) if type(prices) is not pandas.Series else prices
+    
+    # Calculate EMA using pandas' built-in function
+    ema = this_prices.ewm(span=period, adjust=False).mean()
+    
+    return ema

@@ -20,35 +20,43 @@ class Chart:
     def show_trendline(self):
         m, b = np.polyfit(self.x_nd_timestamps, self.current_nd_array, 1)
         trendline = m * self.x_nd_timestamps + b
-        self.plt.plot(self.x_nd_timestamps, trendline, label="Trendline", color="red")
+        self.plt.plot(self.x_nd_timestamps, trendline, color="red", linestyle="--")
         return self
 
-    def show_standard_chart(self):
-        self.plt.plot(self.x_nd_timestamps, self.initial_nd_array, label="Prices")
-        self.plt.set_xlabel(f"Timestamps (Index) - Last price: {self.initial_nd_array[-1]}")
-        self.plt.set_ylabel("Price")
+    def show_chart(self, ylabel="Price"):
+        self.plt.plot(self.x_nd_timestamps, self.initial_nd_array)
+        self.plt.set_xlabel(f"Last: {self.initial_nd_array[-1]}")
+        self.plt.set_ylabel(ylabel)
         self.plt.grid(linestyle='--')
-        self.plt.legend()
         return self
 
     def show_rsi(self, period: int):
         price_count = len(self.initial_nd_array)
-        upper = np.full(price_count, 80)
-        lower = np.full(price_count, 20)
+        upper = np.full(price_count, 80 if period < 10 else 70)
+        lower = np.full(price_count, 20 if period < 10 else 30)
         price_series = pandas.Series(self.initial_nd_array)
-        rsi = indicator.calc_rsi(price_series, period)
-        rsi_nd_array = np.array(rsi)
-        self.plt.plot(self.x_nd_timestamps, rsi_nd_array, label="RSI")
-        self.plt.plot(self.x_nd_timestamps, upper, color="blue")
-        self.plt.plot(self.x_nd_timestamps, lower, color="blue")
+        rsi_series = indicator.calc_rsi(price_series, period)
+        rsi_nd_array = np.array(rsi_series)
+        y_ticks = [i*10 for i in range(11)]
+
+        self.plt.plot(self.x_nd_timestamps, rsi_nd_array)
+        self.plt.plot(self.x_nd_timestamps, upper, color="green")
+        self.plt.plot(self.x_nd_timestamps, lower, color="green")
         self.plt.set_xlabel(f"RSI({period}): {round(rsi_nd_array[-1], 2)}")
-        self.plt.set_ylabel("Index")
+        self.plt.set_ylabel("RSI")
         self.plt.set_ylim(ymin=0, ymax=100)
         self.plt.grid(linestyle='--')
-
-        y_ticks = [i*10 for i in range(11)]
         self.plt.set_yticks(y_ticks)
 
         self.current_nd_array = rsi_nd_array
+
+        return self
+    
+    def show_ema(self, period: int, color: str):
+        ema_series = indicator.calc_ema(self.initial_nd_array, period)
+        ema_nd_array = np.array(ema_series)
+
+        self.plt.plot(self.x_nd_timestamps, ema_nd_array, color=color)
+
         return self
         

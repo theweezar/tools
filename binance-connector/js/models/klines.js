@@ -18,15 +18,21 @@ const parseTimeString = (longTime) => {
  */
 function klines(apiResponseArray) {
     apiResponseArray.forEach(item => {
-        this.push({
+        let kline = {
             openTime: parseTimeString(item[0]),
             openPrice: item[1],
             highPrice: item[2],
             lowPrice: item[3],
             closePrice: item[4],
             volume: item[5],
-            closeTime: parseTimeString(item[6])
-        });
+            closeTime: parseTimeString(item[6]),
+
+            // Up/Down
+            type: item[4] - item[1] >= 0 ? 'U' : 'D'
+        };
+
+
+        this.push(kline);
     });
 }
 

@@ -28,12 +28,15 @@ def get_csv_frame():
 # Initial price data
 frame = get_csv_frame()
 y_prices = np.array(frame['Close Price'])
+y_vols = np.array(frame['Volume'])
 
 # Plot 2 charts, plot the prices and the trendline
-view = View(2, y_prices)
+view = View(3, y_prices)
 
-view.get_chart(0).show_standard_chart().show_trendline()
+view.get_chart(0).show_chart().show_trendline().show_ema(34, "#FFA500").show_ema(89, "green")
 
 view.get_chart(1).show_rsi(7).show_trendline()
+
+view.get_chart(2).set_initial_nd_array(y_vols).show_chart(ylabel="VOL").show_trendline()
 
 view.show()

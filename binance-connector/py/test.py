@@ -1,3 +1,8 @@
-import sys
+import numpy as np
+import pandas
 
-print(sys.argv)
+a = np.array([])
+
+b = pandas.Series(a)
+
+print(type(b) == np.ndarray)

@@ -6,7 +6,8 @@ const path = require('path');
 
 /** Scripts, variables */
 const cwd = process.cwd();
-const csvPath = process.argv[2] ? path.join(cwd, process.argv[2]) : path.join(cwd, 'binance-connector/ignore');
+const argv = process.argv.slice(2);
+const csvPath = argv[0] ? path.join(cwd, argv[0]) : path.join(cwd, 'binance-connector/ignore');
 const symbol = require('./config/symbol.json');
 const key = require('./config/credentials.json');
 const Klines = require('./models/klines');
@@ -42,24 +43,28 @@ const execute = async () => {
         });
 
         csv.writeHeader([
+            'Symbol',
             'Open Time',
             'Close Time',
             'Open Price',
             'High Price',
             'Low Price',
             'Close Price',
-            'Volume'
+            'Volume',
+            'Type'
         ]);
 
         klines.forEach(item => {
             csv.writeRow([
+                params.symbol,
                 item.openTime,
                 item.closeTime,
                 item.openPrice,
                 item.highPrice,
                 item.lowPrice,
                 item.closePrice,
-                item.volume
+                item.volume,
+                item.type
             ]);
         });
 
