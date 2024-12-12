@@ -46,10 +46,10 @@ const execute = async () => {
             'Symbol',
             'Open Time',
             'Close Time',
-            'Open Price',
-            'High Price',
-            'Low Price',
-            'Close Price',
+            'Open',
+            'High',
+            'Low',
+            'Close',
             'Volume',
             'Type'
         ]);
