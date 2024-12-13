@@ -1,6 +1,7 @@
 import util
 import numpy as np
 from view import View
+from matplotlib.pylab import figtext
 
 # https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html
 # https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html
@@ -20,5 +21,12 @@ view.get_chart(0).show_chart(xlabel=f"{symbol} Last").show_trendline().show_ema(
 view.get_chart(1).show_rsi(7).show_trendline()
 
 view.get_chart(2).set_initial_nd_array(y_vols).show_chart(xlabel="VOL Last", ylabel="VOL").show_trendline()
+
+figtext(
+    0, 0,
+    """
+    ema(34): orange, ema(89): green
+    """
+)
 
 view.show()
