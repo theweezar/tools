@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "binance": "^2.13.18",
-    "moment": "^2.30.1"
+    "commander": "^2.20.3",
+    "moment": "^2.30.1",
+    "shelljs": "^0.8.5"
   }
 }
