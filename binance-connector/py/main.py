@@ -8,10 +8,11 @@ from matplotlib.pylab import figtext
 
 
 # Initial price data
-frame = util.get_csv_frame()
-symbol = frame['Symbol'][0]
-y_prices = np.array(frame['Close'])
-y_vols = np.array(frame['Volume'])
+csv = util.get_csv()
+frame = csv["data_frame"]
+symbol = frame["Symbol"][0]
+y_prices = np.array(frame["Close"])
+y_vols = np.array(frame["Volume"])
 
 # Plot 2 charts, plot the prices and the trendline
 view = View(3, y_prices)

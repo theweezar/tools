@@ -8,9 +8,10 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 
 # Example data preprocessing
-data = util.get_csv_frame()
-features = data[['Open', 'High', 'Low', 'Close', 'Volume']]
-target = (data['Close'].shift(-1) > data['Close']).astype(int)  # Binary classification
+csv = util.get_csv()
+data = csv["data_frame"]
+features = data[["Open", "High", "Low", "Close", "Volume", "rsi_7", "rsi_14", "ema_34", "ema_89"]]
+target = (data["Close"].shift(-1) > data["Close"]).astype(int)  # Binary classification
 
 # Scale features
 scaler = MinMaxScaler()
@@ -24,7 +25,7 @@ def create_sequences(features, target, time_steps=30):
         y.append(target[i + time_steps])
     return np.array(X), np.array(y)
 
-time_steps = 30
+time_steps = 5
 X, y = create_sequences(features_scaled, target.values, time_steps)
 
 # Train-test split
@@ -36,10 +37,10 @@ model = Sequential([
     Dropout(0.2),
     LSTM(50),
     Dropout(0.2),
-    Dense(1, activation='sigmoid')  # Binary classification
+    Dense(1, activation="sigmoid")  # Binary classification
 ])
 
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
 
 # Train the model
 history = model.fit(X_train, y_train, epochs=20, batch_size=32, validation_data=(X_test, y_test))

@@ -3,7 +3,7 @@ import os
 import re
 import sys
 
-def get_csv_frame():
+def get_csv() -> dict[str, pandas.DataFrame]:
     cwd = os.getcwd()
     csv_folder_path = ""
 
@@ -21,4 +21,8 @@ def get_csv_frame():
         raise Exception("CSV file not found")
 
     csv_file_path = os.path.join(csv_folder_path, files[0])
-    return pandas.read_csv(csv_file_path, sep=",")
+
+    return {
+        "data_frame": pandas.read_csv(csv_file_path, sep=","),
+        "file_path": csv_file_path
+    }
