@@ -33,8 +33,11 @@ const LIMIT = 500;
 const timeSlots = (() => {
     const slots = [];
     const intervalMS = {
+        '1m': 60000,
+        '3m': 180000,
         '5m': 300000,
         '15m': 300000 * 3,
+        '30m': 300000 * 6,
         '1h': 900000 * 4,
     };
     const range = intervalMS[program.interval] * LIMIT;
@@ -71,8 +74,10 @@ const execute = async () => {
     for (let idx = 0; idx < frameCount; idx++) {
         const slot = timeSlots[idx];
 
-        params.startTime = slot.startTime;
-        params.endTime = slot.endTime;
+        if (frameCount > 1) {
+            params.startTime = slot.startTime;
+            params.endTime = slot.endTime;
+        }
 
         // https://developers.binance.com/docs/binance-spot-api-docs/rest-api/public-api-endpoints#klinecandlestick-data
         const klineData = await client.getKlines(params).catch(error => {
