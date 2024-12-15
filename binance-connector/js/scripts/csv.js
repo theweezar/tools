@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const moment = require('moment');
 
 /**
  * @constructor
@@ -56,9 +55,7 @@ csv.prototype.export = function () {
     }
 
     let exportArr = [];
-    let date = moment().format('YYYYMMDDkkmmss');
-    let fileName = `export_${date}_${this.fileName}`;
-    let finalPath = path.join(this.path, fileName);
+    let finalPath = path.join(this.path, this.fileName);
 
     if (this.header.length) {
         exportArr.push(this.header.pop());

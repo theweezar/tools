@@ -2,5 +2,8 @@
     "BTC": "BTCUSDT",
     "ETH": "ETHUSDT",
     "XRP": "XRPUSDT",
-    "BNB": "BNBUSDT"
+    "BNB": "BNBUSDT",
+    "DOGE": "DOGEUSDT",
+    "PEPE": "PEPEUSDT",
+    "ADA": "ADAUSDT"
 }

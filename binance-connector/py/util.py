@@ -2,6 +2,7 @@ import pandas
 import os
 import re
 import sys
+import json
 
 def get_csv() -> dict[str, pandas.DataFrame]:
     cwd = os.getcwd()
@@ -12,17 +13,17 @@ def get_csv() -> dict[str, pandas.DataFrame]:
     else:
         csv_folder_path = os.path.join(cwd, "binance-connector", "ignore")
 
-    files = [f for f in os.listdir(csv_folder_path) if os.path.isfile(os.path.join(csv_folder_path, f))]
+    json_file = open(os.path.join(csv_folder_path, "fetch.json"))
+    fetch_data = json.load(json_file)
+    file_name = fetch_data["fileName"]
 
-    if len(files) == 0:
-        raise Exception("Data not found.")
+    if re.search("(.csv$)", file_name) is None:
+        raise Exception("CSV not found")
 
-    if re.search("(.csv$)", files[0]) is None:
-        raise Exception("CSV file not found")
-
-    csv_file_path = os.path.join(csv_folder_path, files[0])
+    csv_file_path = os.path.join(csv_folder_path, file_name)
 
     return {
         "data_frame": pandas.read_csv(csv_file_path, sep=","),
+        "file_name": file_name,
         "file_path": csv_file_path
     }
