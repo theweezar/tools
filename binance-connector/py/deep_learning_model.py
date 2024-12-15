@@ -1,11 +1,16 @@
 import util
+import os
 import numpy as np
 from keras.src.models.sequential import Sequential
 from keras.src.layers.rnn.lstm import LSTM
 from keras.src.layers.core.dense import Dense
 from keras.src.layers.regularization.dropout import Dropout
+from keras.src.saving import load_model
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
+
+time_steps = 60
+threshold = 0.5
 
 def create_sequences(features, target, time_steps):
     X, y = [], []
@@ -28,7 +33,7 @@ def preprocessing_x_y_data():
     scaler = MinMaxScaler()
     features_scaled = scaler.fit_transform(features)
 
-    X, y = create_sequences(features_scaled, target.values, 60)
+    X, y = create_sequences(features_scaled, target.values, time_steps)
 
     return X, y
 
@@ -50,8 +55,7 @@ def train_data(x, y):
     # Train the model
     history = model.fit(X_train, y_train, epochs=20, batch_size=32, validation_data=(X_test, y_test))
 
-    print(f"training loss: {history["loss"]}")
-    print(f"training accuracy: {history["acc"]}")
+    print(f"training loss: {history.history["loss"]}")
 
     # Evaluate/test the model
     loss, accuracy = model.evaluate(X_test, y_test)
@@ -61,10 +65,27 @@ def train_data(x, y):
 
     return model
 
+def print_predict_summary(predict):
+    applied_threshold_predict = (predict > threshold).astype(int)
+
+    print(f"predict: {predict}")
+    print(f"applied_threshold_predict: {applied_threshold_predict}")
+    print(f"argmax predict: {np.argmax(predict)}")
+
 X, y = preprocessing_x_y_data()
+
+model_local_path = os.path.join(util.get_export_dir(), "trained_model.keras")
 
 trained_model = train_data(X, y)
 
-predict = trained_model.predict(X[len(X) - 61:len(X) - 1])
+trained_model.export(model_local_path)
 
-print(f"predict: {np.argmax(predict)}")
+predict = trained_model.predict(X[len(X) - (time_steps + 1):len(X) - 1])
+
+print_predict_summary(predict)
+
+# loaded_model = load_model(model_local_path)
+
+# predict = loaded_model.predict(X[len(X) - (time_steps + 1):len(X) - 1])
+
+# print_predict_summary(predict)

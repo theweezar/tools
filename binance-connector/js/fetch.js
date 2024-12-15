@@ -23,7 +23,7 @@ if (!key || !key.apiKey || !key.secretKey) {
 program.version('0.1.0')
     .option('-D, --deleteBeforeExport', 'Delete all exported files in the past before exporting new files')
     .option('-p, --path [export-path]', 'Configure export folder path', 'ignore')
-    .option('-s, --symbol [type]', 'Configure coin symbol', symbol.BTC)
+    .option('-s, --symbol [type]', 'Configure coin symbol', 'BTC')
     .option('-i, --interval [type]', 'Configure chart interval', '5m')
     .option('-f, --frame [type]', 'Configure how many frame to loop', 1)
     .parse(process.argv);
@@ -58,8 +58,9 @@ const timeSlots = (() => {
     return slots;
 })();
 
+const selectedSymbol = symbol[program.symbol];
 const params = {
-    symbol: program.symbol,
+    symbol: selectedSymbol,
     interval: program.interval
 };
 const date = moment().format('YYYYMMDDkkmmss');
