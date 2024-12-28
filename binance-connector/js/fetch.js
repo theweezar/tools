@@ -116,6 +116,8 @@ const exportLastestAPI = () => {
         fileName: csvFileName
     });
 
+    const klineArray = mainKlineModel.export();
+
     csv.writeHeader([
         'Symbol',
         'Open Time',
@@ -128,7 +130,7 @@ const exportLastestAPI = () => {
         'Type'
     ]);
 
-    mainKlineModel.export().forEach(item => {
+    klineArray.forEach(item => {
         csv.writeRow([
             params.symbol,
             item.openTime,
@@ -151,4 +153,6 @@ const exportLastestAPI = () => {
     csv.export();
 
     exportLastestAPI();
+
+    console.info('Last price:', klineArray[klineArray.length - 1]);
 })();

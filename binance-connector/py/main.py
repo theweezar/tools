@@ -18,15 +18,15 @@ y_prices = np.array(frame["Close"])
 y_vols = np.array(frame["Volume"])
 
 # Plot 2 charts, plot the prices and the trendline
-view = View(4, y_prices)
+view = View(3, y_prices)
 
 view.get_chart(0).show_chart(xlabel=f"{symbol} Last").show_trendline().show_ema(34, "green").show_ema(89, "blue")
 
 view.get_chart(1).show_rsi(7).show_trendline()
 
-view.get_chart(2).set_initial_nd_array(y_vols).show_chart(xlabel="VOL Last", ylabel="VOL").show_trendline()
+# view.get_chart(2).set_initial_nd_array(y_vols).show_chart(xlabel="VOL Last", ylabel="VOL").show_trendline()
 
-view.get_chart(3).set_text(
+view.get_chart(2).set_text(
     f"""
     File: {csv_file_name}
 

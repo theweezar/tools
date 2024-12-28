@@ -14,6 +14,8 @@ rsi_7 = indicator.calc_rsi(y_prices, 7)
 
 rsi_14 = indicator.calc_rsi(y_prices, 14)
 
+rsi_30 = indicator.calc_rsi(y_prices, 30)
+
 ema_34 = indicator.calc_ema(y_prices_nd_array, 34)
 
 ema_89 = indicator.calc_ema(y_prices_nd_array, 89)
@@ -21,6 +23,8 @@ ema_89 = indicator.calc_ema(y_prices_nd_array, 89)
 frame['rsi_7'] = rsi_7
 
 frame['rsi_14'] = rsi_14
+
+frame['rsi_30'] = rsi_30
 
 frame['ema_34'] = ema_34
 
