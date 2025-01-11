@@ -1,6 +1,7 @@
 {
-    "output": "./ignore/curl/patreon/pack_4",
+    "output": "./ignore/curl/patreon",
     "entries": [
+        "https://c10.patreonusercontent.com/4/patreon-media/p/post/119594843/1a236df90359463e8824bf1be8ea92be/eyJxIjoxMDAsIndlYnAiOjB9/1.png?token-time=1737849600&token-hash=LxmDouuvyvGeGRuOzCNaS5n2szqjwsL6UL5mKikZufM%3D"
     ],
-    "type": "patreon"
+    "type": "patreonusercontent"
 }
