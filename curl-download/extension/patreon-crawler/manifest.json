@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
-    "name": "CURL Connector",
-    "description": "CURL Connector",
+    "name": "Patreon Crawler",
+    "description": "Patreon Crawler",
     "version": "1.0",
     "action": {
         "default_popup": "index.html",
@@ -16,23 +16,10 @@
     "permissions": [
         "activeTab",
         "scripting",
-        "windows"
+        "windows",
+        "storage"
     ],
     "host_permissions": [
         "*://*/*"
-    ],
-    "content_scripts": [
-        {
-            "matches": [
-                "https://www.facebook.com/*",
-                "https://x.com/*"
-            ],
-            "js": [
-                "./client/js/tab/onload.js"
-            ]
-        }
-    ],
-    "content_security_policy": {
-        "extension_page": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
-    }
+    ]
 }

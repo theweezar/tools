@@ -94,7 +94,7 @@ function executePatreonDownloader() {
 }
 
 /**
- * Direct download
+ * Direct download file if not exist
  * @param {Array} fileExistingInDir - Files are existing in dir
  */
 function directDownload(fileExistingInDir) {
