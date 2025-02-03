@@ -87,7 +87,7 @@ async function fetchImage() {
                 imgUrls = imgUrls.concat(imgUrlResult);
             }
 
-            document.getElementById('result').innerText = `Captured ${imgUrls.length} image links.`;
+            document.getElementById('result').innerHTML = `Captured <strong>${imgUrls.length}</strong> images.`;
         });
     }
 }
@@ -102,13 +102,13 @@ function downloadImageUrlFile() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('openPost').addEventListener('click', function () {
+    document.getElementById('openPost')?.addEventListener('click', function () {
         init();
     });
-    document.getElementById('fetchImg').addEventListener('click', function () {
+    document.getElementById('fetchImg')?.addEventListener('click', function () {
         fetchImage();
     });
-    document.getElementById('download').addEventListener('click', function () {
+    document.getElementById('download')?.addEventListener('click', function () {
         downloadImageUrlFile();
     });
 });

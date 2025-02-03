@@ -1,6 +1,7 @@
 'use strict';
 
-const child_process = require('child_process');
+// const child_process = require('child_process');
+const shell = require('shelljs');
 
 /**
  * Execute command line
@@ -8,12 +9,16 @@ const child_process = require('child_process');
  * @returns {string} - Return result
  */
 function runCmd(cmd) {
+    console.log(cmd);
     try {
-        let resp = child_process.execSync(cmd);
-        let result = resp.toString('UTF8');
-        return result;
-    } catch (error) {}
-    return '';
+        // let resp = child_process.execSync(cmd);
+        // let result = resp.toString('UTF8');
+        // return result;
+
+        return shell.exec(cmd);
+    } catch (error) {
+        return '';
+    }
 }
 
 /**
@@ -33,7 +38,6 @@ function exeCurl(link, output) {
         return copied;
     }, '');
     let cmd = `curl ${query}`;
-    console.log(cmd);
     runCmd(cmd);
 }
 

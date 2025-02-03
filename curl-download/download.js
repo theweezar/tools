@@ -33,7 +33,7 @@ const config = (() => {
             return {
                 fileName: createFileNameFromURL(url),
                 hostName: url.hostname,
-                relativePath: url.pathname.substring(0, url.pathname.lastIndexOf('/')),
+                // relativePath: url.pathname.substring(0, url.pathname.lastIndexOf('/')),
                 fullPath: url.href
             };
         });
@@ -112,6 +112,8 @@ function directDownload(fileExistingInDir) {
 }
 
 function execute() {
+    // console.log(config.outputPath);
+
     mkDirIfNotExist();
 
     let fileExistingInDir = getFilesInOuputDir();

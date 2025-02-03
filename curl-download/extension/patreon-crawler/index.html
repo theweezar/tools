@@ -6,11 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connector</title>
     <script defer src="./client/js/popup/index.js"></script>
+
+    <style>
+        .container {
+            width: 150px;
+            text-align: center;
+        }
+
+        .container button {
+            margin-bottom: 8px;
+            width: 100%;
+        }
+
+        .container button:last-child {
+            margin: 0;
+        }
+    </style>
 </head>
 
 <body>
-    <div>
-        <button id="openPost" style="display: none;">Open Posts</button>
+    <div class="container">
+        <!-- <button id="openPost" style="display: none;">Open Posts</button> -->
         <button id="fetchImg">Fetch Images</button>
         <button id="download">Download</button>
     </div>

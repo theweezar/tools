@@ -7,15 +7,14 @@
     console.log(imgList);
 })();
 
-// Patreon
+// Patreon file link
 (() => {
     let linkEls = document.querySelectorAll('[data-tag="post-attachments"] a[data-tag="post-attachment-link"]');
-    let links = [];
     let url = new URL(window.location.href);
-    linkEls.forEach(el => {
-        links.push(`${url.protocol}//${url.hostname}${el.getAttribute('href')}`);
-    });
-    console.log(links);
+
+    console.log(
+        Array.from(linkEls).map(el => `${url.protocol}//${url.hostname}${el.getAttribute('href')}`)
+    );
 })();
 
 // Patreon post link
