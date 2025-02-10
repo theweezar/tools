@@ -7,14 +7,10 @@ const dot = require('./dot');
 const cwd = process.cwd();
 
 const CONFIG = {
-    SOURCE: 'ignore/20240918_dev_atph_content-slots.xml',
+    SOURCE: 'ignore/20250210_dev_ssjp_content-slots.xml',
     SLOT_ID: [
-        'home-revamp-products-m',
-        'home-revamp-products-r',
-        'home-revamp-products-w',
-        'home-revamp-product-best-sellers',
-        'new-header-menu',
-        'footer-column-m-revamp'
+        'experience-product-best-seller',
+        'experience-product-for-her'
     ],
     CONFIGURATION_ID: [],
     EXPORT_PATTERN: 'SAMAE-600_ph-content-slots'
@@ -35,6 +31,80 @@ function extractRelatedObjects(rawArray) {
     return [];
 }
 
+/**
+ * Filter active slots
+ * @param {Array} slotArray - Slot array
+ * @returns {Array} - Active slots array
+ */
+function filterActiveSlots(slotArray) {
+    return slotArray.filter(slotXmlObj => {
+        const enableFlag = dot.getProp(slotXmlObj, 'enabled-flag.0');
+        return enableFlag && enableFlag === 'true';
+    });
+}
+
+/**
+ * Filter slots having highest rank
+ * @param {Array} slotArray - Slot array
+ * @returns {Array} - Slots array
+ */
+function filterSlotsHaveRank(slotArray) {
+    const slotsHaveRank = slotArray.filter(slotXmlObj => {
+        return Array.isArray(slotXmlObj.rank) && slotXmlObj.rank.length > 0;
+    });
+
+    if (slotsHaveRank.length === 0) return slotArray;
+
+    if (slotsHaveRank.length === 1) return slotsHaveRank;
+
+    const sortedSlots = slotsHaveRank.sort((a, b) => {
+        let aRank = Number(a.rank[0]);
+        let bRank = Number(b.rank[0]);
+        return aRank - bRank;
+    });
+
+    if (sortedSlots.length === 1) return sortedSlots;
+
+    return sortedSlots.filter(slotXmlObj => {
+        return slotXmlObj.rank[0] === sortedSlots[0].rank[0];
+    });
+}
+
+/**
+ * Filter slot object
+ * @param {Array} slotArray - Slot array
+ * @returns {Array} - Filtered slot object array
+ */
+function filterSlotBySchedule(slotArray) {
+
+}
+
+/**
+ * Filter slot object
+ * @param {Array} slotArray - Slot array
+ * @returns {Array} - Filtered slot object array
+ */
+function filterLatestActiveConfigurationIDInSlot(slotArray) {
+    const slotGroup = {};
+    const activeSlots = filterActiveSlots(slotArray);
+
+    activeSlots.forEach(slotXmlObj => {
+        const slotID = slotXmlObj.$ && slotXmlObj.$['slot-id'];
+        if (!slotGroup[slotID]) slotGroup[slotID] = [];
+        slotGroup[slotID].push(slotXmlObj);
+    });
+
+    let latestActiveSlots = [];
+
+    Object.keys(slotGroup).forEach(slotID => {
+        const group = slotGroup[slotID];
+        const slotsHaveRank = filterSlotsHaveRank(group);
+        latestActiveSlots = latestActiveSlots.concat(slotsHaveRank);
+    });
+
+    return latestActiveSlots;
+}
+
 async function main() {
     const xmlPath = path.join(cwd, CONFIG.SOURCE);
     const fullXmlObj = await helpers.xmlToJSON(xmlPath);
@@ -45,7 +115,9 @@ async function main() {
     const relatedSlots = extractRelatedObjects(slotArray);
     const relatedSlotAssignments = extractRelatedObjects(slotAssignmentArray);
 
-    dot.set(fullXmlObj, 'slot-configurations.slot-configuration', relatedSlots);
+    const latestActiveSlots = filterLatestActiveConfigurationIDInSlot(relatedSlots);
+
+    dot.set(fullXmlObj, 'slot-configurations.slot-configuration', latestActiveSlots);
     dot.set(fullXmlObj, 'slot-configurations.slot-configuration-campaign-assignment', relatedSlotAssignments);
 
     const finalXml = helpers.buildXML(fullXmlObj);

@@ -21,7 +21,13 @@ function xmlToJSON(path) {
  * @returns {string} - XML string
  */
 function buildXML(xmlObj) {
-    const builder = new xml2js.Builder();
+    const builder = new xml2js.Builder({
+        renderOpts: {
+            pretty: true,
+            indent: '    ',
+            newline: '\n'
+        }
+    });
     const xmlStr = builder.buildObject(xmlObj);
     return xmlStr;
 }
@@ -33,7 +39,7 @@ function buildXML(xmlObj) {
  * @param {string|null|undefined} exportFileName - Export file name
  */
 function exportXml(originFilePath, xml, exportFileName) {
-    const split = originFilePath.split('\\');    
+    const split = originFilePath.split('\\');
     const fileName = split.pop();
     const folder = split.join('\\');
     const exportFolderPath = path.join(folder, 'export');
@@ -44,7 +50,7 @@ function exportXml(originFilePath, xml, exportFileName) {
     if (!fs.existsSync(exportFolderPath)) {
         fs.mkdirSync(exportFolderPath);
     }
-    
+
     fs.writeFileSync(exportFilePath, xml);
     console.log(`Exported to folder: ${exportFolderPath}`);
     console.log(`Wrote to file: ${exportFilePath}`);
