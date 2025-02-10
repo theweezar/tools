@@ -7,5 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "DucHoang",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "json-2-csv": "^5.5.8"
+  }
 }
