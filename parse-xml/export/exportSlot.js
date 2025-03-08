@@ -2,18 +2,20 @@
 
 const path = require('path');
 const moment = require('moment');
-const helpers = require('./helpers/helpers');
-const dot = require('./dot');
+const helpers = require('../helpers/helpers');
+const object = require('../object');
 const cwd = process.cwd();
 
 const CONFIG = {
     SOURCE: 'ignore/20250210_dev_ssjp_content-slots.xml',
     SLOT_ID: [
+        'experience-product-new',
         'experience-product-best-seller',
-        'experience-product-for-her'
+        'experience-product-for-her',
+        'experience-product-for-him',
     ],
     CONFIGURATION_ID: [],
-    EXPORT_PATTERN: 'SAMAE-600_ph-content-slots'
+    EXPORT_PATTERN: 'exported_ssjp-slots'
 };
 
 /**
@@ -38,7 +40,7 @@ function extractRelatedObjects(rawArray) {
  */
 function filterActiveSlots(slotArray) {
     return slotArray.filter(slotXmlObj => {
-        const enableFlag = dot.getProp(slotXmlObj, 'enabled-flag.0');
+        const enableFlag = object.resolve(slotXmlObj, 'enabled-flag.0');
         return enableFlag && enableFlag === 'true';
     });
 }
@@ -109,19 +111,20 @@ async function main() {
     const xmlPath = path.join(cwd, CONFIG.SOURCE);
     const fullXmlObj = await helpers.xmlToJSON(xmlPath);
 
-    const slotArray = dot.getProp(fullXmlObj, 'slot-configurations.slot-configuration');
-    const slotAssignmentArray = dot.getProp(fullXmlObj, 'slot-configurations.slot-configuration-campaign-assignment');
+    const slotArray = object.resolve(fullXmlObj, 'slot-configurations.slot-configuration');
+    const slotAssignmentArray = object.resolve(fullXmlObj, 'slot-configurations.slot-configuration-campaign-assignment');
 
     const relatedSlots = extractRelatedObjects(slotArray);
     const relatedSlotAssignments = extractRelatedObjects(slotAssignmentArray);
 
-    const latestActiveSlots = filterLatestActiveConfigurationIDInSlot(relatedSlots);
+    // const latestActiveSlots = filterLatestActiveConfigurationIDInSlot(relatedSlots);
 
-    dot.set(fullXmlObj, 'slot-configurations.slot-configuration', latestActiveSlots);
-    dot.set(fullXmlObj, 'slot-configurations.slot-configuration-campaign-assignment', relatedSlotAssignments);
+    object.set(fullXmlObj, 'slot-configurations.slot-configuration', relatedSlots);
+    object.set(fullXmlObj, 'slot-configurations.slot-configuration-campaign-assignment', relatedSlotAssignments);
 
     const finalXml = helpers.buildXML(fullXmlObj);
     const date = moment().format('YYYYMMDDkkmmss');
+
     helpers.exportXml(xmlPath, finalXml, `${date}_${CONFIG.EXPORT_PATTERN}.xml`);
 }
 
