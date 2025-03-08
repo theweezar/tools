@@ -1,8 +1,8 @@
 'use strict';
 
 const path = require('path');
-const helpers = require('./helpers/helpers');
-const assetHelpers = require('./helpers/assetHelpers');
+const helpers = require('../helpers/helpers');
+const assetHelpers = require('../helpers/assetHelpers');
 const cwd = process.cwd();
 
 const config = {
