@@ -3,7 +3,7 @@
 const path = require('path');
 const helpers = require('../helpers/helpers');
 const assetHelpers = require('../helpers/assetHelpers');
-const object = require('../object');
+const object = require('../lib/object');
 const cwd = process.cwd();
 
 const config = {

@@ -3,7 +3,7 @@
 const path = require('path');
 const moment = require('moment');
 const helpers = require('../helpers/helpers');
-const object = require('../object');
+const object = require('../lib/object');
 const cwd = process.cwd();
 
 const CONFIG = {
