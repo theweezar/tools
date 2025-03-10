@@ -1,0 +1,7 @@
+{
+    "sites": {
+        "<site ID>": {
+            "site_preferences" : true
+        }
+    }
+}

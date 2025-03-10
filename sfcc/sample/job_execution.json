@@ -1,0 +1,20 @@
+{
+    "data_units": {
+        "sites": {
+            "<site ID>": {
+                "all": true
+            }
+        },
+        "catalogs": {
+            "<catalog ID>": true
+        },
+        "inventory_lists": {
+            "<inventory ID>": true
+        },
+        "price_books": {
+            "<price book ID>": true
+        }
+    },
+    "export_file": "<file path. sample: path/file_name",
+    "overwrite_export_file": true
+}
