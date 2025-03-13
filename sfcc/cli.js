@@ -2,6 +2,7 @@
 
 const program = require('commander');
 const webdav = require('./lib/webdav');
+const zip = require('./lib/zip');
 
 program
     .command('data:download')
@@ -13,5 +14,13 @@ program
     .description('Downloads a file from a Commerce Cloud instance')
     .action(webdav.download)
     .on('--help', webdav.help);
+
+program
+    .command('zip')
+    .option('-p, --path <path>', 'The path of the zip file or folders/files')
+    .option('-m, --mode <extract/compress>', 'Mode: Extract or Compress')
+    .description('Processes Zip')
+    .action(zip.process)
+    .on('--help', zip.help);
 
 program.parse(process.argv);

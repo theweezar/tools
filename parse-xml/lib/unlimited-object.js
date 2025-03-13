@@ -7,9 +7,17 @@
  */
 function unlimitedObject(unitQuota) {
     this.data = [{}];
-    this.index = this.data.length - 1;
     this.unitQuota = unitQuota;
+    this.reCalcDataInfo();
 }
+
+/**
+ * Re-calculate data information when creating a new unit
+ */
+unlimitedObject.prototype.reCalcDataInfo = function () {
+    this.index = this.data.length - 1;
+    this.unitLength = this.data.length;
+};
 
 /**
  * Handles updating or setting data for a given key in a specified index.
@@ -33,7 +41,7 @@ unlimitedObject.prototype.handle = function (index, key, data, callback) {
  * @param {Function} [callback] - Optional callback function for data transformation.
  */
 unlimitedObject.prototype.set = function (key, data, callback) {
-    for (let i = 0; i < this.index; i++) {
+    for (let i = 0; i < this.unitLength; i++) {
         if (this.data[i][key]) {
             this.handle(i, key, data, callback);
             return;
@@ -43,7 +51,7 @@ unlimitedObject.prototype.set = function (key, data, callback) {
     // Check if last unit key length reaches quota or not
     if (Object.keys(this.data[this.index]).length >= this.unitQuota) {
         this.data.push({});
-        this.index = this.data.length - 1;
+        this.reCalcDataInfo();
     }
 
     this.handle(this.index, key, data, callback);
@@ -55,7 +63,7 @@ unlimitedObject.prototype.set = function (key, data, callback) {
  * @returns {*} The value associated with the key, or undefined if not found.
  */
 unlimitedObject.prototype.get = function (key) {
-    for (let i = 0; i < this.index; i++) {
+    for (let i = 0; i < this.unitLength; i++) {
         let unit = this.data[i];
         if (unit[key]) return unit[key];
     }
