@@ -57,16 +57,18 @@ if [ -z "${has_file}" ]; then
     exit 1
 fi
 
-node cli.js zip -m extract -p $local/$file_name.zip
+node cli.js zip -m extract -p $local/$file_name.zip -r 1
 
 node cli.js start -m development -p $local/$file_name
 
-# print "Upload file $local/$file_name.zip to instance $target_ins"
+node cli.js zip -m compress -p $local/$file_name -r 1
 
-# npx sfcc-ci data:upload -i $target_ins -t $impex_base -f $local/$file_name.zip
+print "Upload file $local/$file_name.zip to instance $target_ins"
 
-# print "Import $local/$file_name.zip to instance $target_ins"
+npx sfcc-ci data:upload -i $target_ins -t $impex_base -f $local/$file_name.zip
 
-# npx sfcc-ci instance:import $file_name.zip -i $target_ins -s
+print "Import $local/$file_name.zip to instance $target_ins"
+
+npx sfcc-ci instance:import $file_name.zip -i $target_ins -s
 
 npx sfcc-ci auth:logout

@@ -41,14 +41,25 @@ function compress(filePath) {
 }
 
 /**
+ * Removes a file at the specified path.
+ * @param {string} filePath - The path of the file to be removed.
+ */
+function remove(filePath) {
+    fs.rmSync(filePath, { recursive: true, force: true });
+    console.log(`Removed ${filePath}`);
+}
+
+/**
  * Processes the given options to either extract or compress a ZIP file.
  * @param {Object} options - The options for processing.
  * @param {string} options.path - The file or folder path to process.
  * @param {string} options.mode - The mode of operation ("extract" or "compress").
+ * @param {string|undefined} options.remove - The remove on resolve flag ("1" or empty).
  */
 function process(options) {
     let filePath = options.path;
     let mode = options.mode;
+    let removeOnResolve = String(options.remove) === '1' ? true : false;
 
     if (!filePath) {
         this.missingArgument('path');
@@ -68,13 +79,19 @@ function process(options) {
     switch (mode) {
         case 'extract':
             extract(filePath)
-                .then(() => console.log('Extracted file successfully'))
+                .then(() => {
+                    console.log('Extracted file successfully');
+                    if (removeOnResolve) remove(filePath);
+                })
                 .catch(error => console.error(error));
             break;
 
         case 'compress':
             compress(filePath)
-                .then(() => console.log('Zipped file successfully'))
+                .then(() => {
+                    console.log('Zipped file successfully');
+                    if (removeOnResolve) remove(filePath);
+                })
                 .catch(error => console.error('Failed to compress zip file. Error', error))
             break;
 

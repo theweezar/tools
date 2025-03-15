@@ -16,12 +16,13 @@ program
     .action(webdav.download)
     .on('--help', webdav.help);
 
-// node cli.js zip -m extract -p ./webdav/<file>.zip
+// node cli.js zip -m extract -p ./webdav/<file>.zip -r 1
 // node cli.js zip -m compress -p ./webdav/<file>
 program
     .command('zip')
     .option('-p, --path <path>', 'The path of the zip file or folders/files')
-    .option('-m, --mode <extract/compress>', 'Mode: Extract or Compress')
+    .option('-m, --mode <extract or compress>', 'Mode: Extract or Compress')
+    .option('-r, --remove <1 or 0>', 'Remove source after processing')
     .description('Processes Zip')
     .action(zip.process)
     .on('--help', zip.help);
