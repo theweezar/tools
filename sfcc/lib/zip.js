@@ -61,7 +61,8 @@ function process(options) {
 
     filePath = path.resolve(filePath);
     if (!fs.existsSync(filePath)) {
-        console.log('File not found');
+        console.error('File not found');
+        process.exit(1);
     }
 
     switch (mode) {

@@ -3,6 +3,7 @@
 const program = require('commander');
 const webdav = require('./lib/webdav');
 const zip = require('./lib/zip');
+const xml = require('./lib/xml');
 
 program
     .command('data:download')
@@ -15,8 +16,8 @@ program
     .action(webdav.download)
     .on('--help', webdav.help);
 
-// node cli.js zip -m extract -p ./webdav/preferences_MonoSamsoniteSG.zip
-// node cli.js zip -m compress -p ./webdav/preferences_MonoSamsoniteSG
+// node cli.js zip -m extract -p ./webdav/<file>.zip
+// node cli.js zip -m compress -p ./webdav/<file>
 program
     .command('zip')
     .option('-p, --path <path>', 'The path of the zip file or folders/files')
@@ -24,5 +25,13 @@ program
     .description('Processes Zip')
     .action(zip.process)
     .on('--help', zip.help);
+
+// node cli.js start -p ./webdav/<folder>
+program
+    .command('start')
+    .option('-p, --path <path>', 'The site folder path')
+    .option('-m, --mode <development/staging/production>', 'Filtering mode')
+    .description('Processes site data')
+    .action(xml.process)
 
 program.parse(process.argv);

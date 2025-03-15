@@ -5,8 +5,9 @@ const fs = require('fs');
 const path = require('path');
 
 /**
- * Parse XML to JSON
- * @returns {Promise<any>} - Promise handler
+ * Parses an XML file to JSON.
+ * @param {string} path - The file path of the XML file.
+ * @returns {Promise<any>} - A promise that resolves to the parsed JSON object.
  */
 function xmlToJSON(path) {
     const xml = fs.readFileSync(path, {
@@ -16,9 +17,9 @@ function xmlToJSON(path) {
 }
 
 /**
- * Build XML string from object
- * @param {Object} xmlObj - XML JSON object
- * @returns {string} - XML string
+ * Builds an XML string from a JSON object.
+ * @param {Object} xmlObj - The JSON representation of XML.
+ * @returns {string} - The formatted XML string.
  */
 function buildXML(xmlObj) {
     const builder = new xml2js.Builder({
