@@ -9,6 +9,7 @@
   "author": "Duc Hoang",
   "license": "ISC",
   "dependencies": {
+    "adm-zip": "^0.5.16",
     "commander": "^2.18.0",
     "extract-zip": "^2.0.1",
     "sfcc-ci": "^2.12.0"

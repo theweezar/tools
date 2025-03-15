@@ -15,6 +15,8 @@ program
     .action(webdav.download)
     .on('--help', webdav.help);
 
+// node cli.js zip -m extract -p ./webdav/preferences_MonoSamsoniteSG.zip
+// node cli.js zip -m compress -p ./webdav/preferences_MonoSamsoniteSG
 program
     .command('zip')
     .option('-p, --path <path>', 'The path of the zip file or folders/files')
