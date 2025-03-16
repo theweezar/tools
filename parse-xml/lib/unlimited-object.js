@@ -1,60 +1,60 @@
 'use strict';
 
 /**
- * Creates an instance of unlimitedObject to manage key-value storage with quotas.
+ * Creates an instance of UnlimitedObject to manage key-value storage with quotas.
  * @constructor
  * @param {number} unitQuota - Maximum number of keys allowed per storage unit.
  */
-function unlimitedObject(unitQuota) {
-    this.data = [{}];
+function UnlimitedObject(unitQuota) {
+    this.units = [{}];
     this.unitQuota = unitQuota;
-    this.reCalcDataInfo();
+    this.updateUnitInfo();
 }
 
 /**
- * Re-calculate data information when creating a new unit
+ * Updates unit information when creating a new unit.
  */
-unlimitedObject.prototype.reCalcDataInfo = function () {
-    this.index = this.data.length - 1;
-    this.unitLength = this.data.length;
+UnlimitedObject.prototype.updateUnitInfo = function () {
+    this.currentIndex = this.units.length - 1;
+    this.totalUnits = this.units.length;
 };
 
 /**
- * Handles updating or setting data for a given key in a specified index.
- * @param {number} index - The index of the storage unit.
+ * Handles updating or setting data for a given key in a specified unit.
+ * @param {number} unitIndex - The index of the storage unit.
  * @param {string} key - The key to update.
- * @param {*} data - The new data to set.
- * @param {Function} [callback] - Optional callback function for transformation.
+ * @param {*} value - The new value to set.
+ * @param {Function} [transform] - Optional callback function for transformation.
  */
-unlimitedObject.prototype.handle = function (index, key, data, callback) {
-    if (callback && typeof callback === 'function') {
-        this.data[index][key] = callback(this.data[index][key], data);
+UnlimitedObject.prototype.handleData = function (unitIndex, key, value, transform) {
+    if (transform && typeof transform === 'function') {
+        this.units[unitIndex][key] = transform(this.units[unitIndex][key], value);
     } else {
-        this.data[index][key] = data;
+        this.units[unitIndex][key] = value;
     }
 };
 
 /**
  * Sets a key-value pair in the object, creating new storage units if necessary.
  * @param {string} key - The key to set.
- * @param {*} data - The data to store.
- * @param {Function} [callback] - Optional callback function for data transformation.
+ * @param {*} value - The value to store.
+ * @param {Function} [transform] - Optional callback function for data transformation.
  */
-unlimitedObject.prototype.set = function (key, data, callback) {
-    for (let i = 0; i < this.unitLength; i++) {
-        if (this.data[i][key]) {
-            this.handle(i, key, data, callback);
+UnlimitedObject.prototype.set = function (key, value, transform) {
+    for (var i = 0; i < this.totalUnits; i++) {
+        if (this.units[i][key]) {
+            this.handleData(i, key, value, transform);
             return;
         }
     }
 
-    // Check if last unit key length reaches quota or not
-    if (Object.keys(this.data[this.index]).length >= this.unitQuota) {
-        this.data.push({});
-        this.reCalcDataInfo();
+    // Check if the last unit key length reaches quota
+    if (Object.keys(this.units[this.currentIndex]).length >= this.unitQuota) {
+        this.units.push({});
+        this.updateUnitInfo();
     }
 
-    this.handle(this.index, key, data, callback);
+    this.handleData(this.currentIndex, key, value, transform);
 };
 
 /**
@@ -62,12 +62,21 @@ unlimitedObject.prototype.set = function (key, data, callback) {
  * @param {string} key - The key to look up.
  * @returns {*} The value associated with the key, or undefined if not found.
  */
-unlimitedObject.prototype.get = function (key) {
-    for (let i = 0; i < this.unitLength; i++) {
-        let unit = this.data[i];
-        if (unit[key]) return unit[key];
+UnlimitedObject.prototype.get = function (key) {
+    for (var i = 0; i < this.totalUnits; i++) {
+        if (this.units[i][key]) return this.units[i][key];
     }
     return undefined;
 };
 
-module.exports = unlimitedObject;
+/**
+ * Get the total number of keys in all units.
+ * @returns {number} - Total number of keys.
+ */
+UnlimitedObject.prototype.getTotalKeys = function () {
+    return this.units.reduce(function (total, unit) {
+        return total + Object.keys(unit).length
+    }, 0);
+};
+
+module.exports = UnlimitedObject;
