@@ -1,0 +1,10 @@
+{
+    "catalog": {
+        "category": {
+            "refinement-definitions": true,
+            "custom-attributes": {
+                "@attribute-id=alternativeUrl": true
+            }
+        }
+    }
+}
