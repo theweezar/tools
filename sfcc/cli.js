@@ -16,6 +16,16 @@ program
     .action(webdav.download)
     .on('--help', webdav.help);
 
+program
+    .command('data:delete')
+    .option('-i, --instance <instance>', 'Instance to download the file from. Can be an ' +
+        'instance alias. If not specified the currently configured instance will be used.')
+    .option('-p, --path <path>', 'The path of the file (WebDAV) to delete')
+    .option('-f, --file <target>', 'The remote file name to delete')
+    .description('Deletes a file from a Commerce Cloud instance')
+    .action(webdav.deleteFile)
+    .on('--help', webdav.deleteFileHelp);
+
 // node cli.js zip -m extract -p ./webdav/<file>.zip -r 1
 // node cli.js zip -m compress -p ./webdav/<file>
 program
