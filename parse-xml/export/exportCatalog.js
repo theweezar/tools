@@ -45,11 +45,20 @@ async function main() {
 function processCategory(category) {
     let refDefs = category['refinement-definitions'];
     let customAttrs = object.resolve(category, 'custom-attributes.0.custom-attribute');
+    let urls = [
+        `$url('Search-Show', 'cgid', 'luggage')$`,
+        `$url('Search-Show', 'cgid', 'backpack')$`,
+        `$url('Search-Show', 'cgid', 'bag')$`,
+        `$url('Search-Show', 'cgid', 'accessories')$`
+    ];
 
     if (Array.isArray(customAttrs)) {
         customAttrs = customAttrs.filter(attr => {
-            let match = attr.$ && attr.$['attribute-id'] === 'alternativeUrl';
-            return match;
+            let matchAttr = attr.$ && attr.$['attribute-id'] === 'alternativeUrl';
+            let matchVal = attr._ && urls.some(url => {
+                return attr._.includes(url);
+            });
+            return matchAttr && matchVal;
         });
         object.set(category, 'custom-attributes.0.custom-attribute', customAttrs);
     }
