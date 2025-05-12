@@ -1,0 +1,16 @@
+{
+    "create-pageIDs-json.js": {
+        "csvPath": "ignore/rating/ssth/20250512_staging_th-samsonite-products.csv",
+        "jsonPath": "ignore/rating/ssth/20250512_staging_th-samsonite-products.json"
+    },
+    "crawl-review.js": {
+        "baseJsonPath": "ignore/rating/ssth/20250512_staging_th-samsonite-products.json",
+        "outputJsonPath": "ignore/rating/ssth/20250512_staging_th-samsonite-products_fetched.json",
+        "baseUrl": "https://display.powerreviews.com/m/320426/l/en_US/product/{{pageID}}/reviews?apikey=b3e955d9-8bd2-4396-8896-71a32b6e0d2e&_noconfig=true"
+    },
+    "create-product-xml.js": {
+        "entryJsonPath": "ignore/rating/ssth/20250512_staging_th-samsonite-products_fetched.json",
+        "outputXmlPath": "ignore/rating/ssth/20250512_catalog_Samsonites_reviewsummary_en-TH.xml",
+        "locale": "en-TH"
+    }
+}
