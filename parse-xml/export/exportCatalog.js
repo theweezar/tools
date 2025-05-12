@@ -1,19 +1,28 @@
 'use strict';
 
 const path = require('path');
+const fs = require('fs');
 const helpers = require('../helpers/helpers');
 const object = require('../lib/object');
 const cwd = process.cwd();
 
 // Read and parse the XML file synchronously
 
+function remove(obj, prop) {
+    if (Object.hasOwnProperty.call(obj, prop)) {
+        delete obj[prop];
+    }
+}
+
 async function main() {
-    const xmlFilePath = path.join(cwd, 'sfcc/webdav/20250505_SE20-594_configs/catalogs/hk-samsonite/catalog.xml');
-    const outXmlFilePath = path.join(cwd, 'ignore', 'catalog', 'filtered_catalog.xml');
+    const catalog = 'kr-samsonite';
+    const xmlFilePath = path.join(cwd, `sfcc/webdav/SE20-594_dev_configs/catalogs/${catalog}/catalog.xml`);
+    const outXmlFilePath = path.join(cwd, `sfcc/webdav/SE20-594_dev_configs/catalogs/${catalog}`, `20250512_SE20-594_filtered_catalog_${catalog}.xml`);
     const fullXmlObj = await helpers.xmlToJSON(xmlFilePath);
 
-    delete fullXmlObj.catalog['header'];
-    delete fullXmlObj.catalog['category-assignment'];
+    remove(fullXmlObj.catalog, 'header');
+    remove(fullXmlObj.catalog, 'category-assignment');
+    remove(fullXmlObj.catalog, 'product');
 
     const categories = fullXmlObj.catalog.category;
 
@@ -21,8 +30,6 @@ async function main() {
         console.log('Categories is not an array:', categories);
         return;
     }
-
-    console.log('Categories:', categories.length);
 
     const filteredCategories = categories.filter(category => {
         let status = processCategory(category);
@@ -39,12 +46,19 @@ async function main() {
     fullXmlObj.catalog.category = filteredCategories;
 
     const finalXml = helpers.buildXML(fullXmlObj);
-    helpers.exportXml(outXmlFilePath, finalXml, null);
+
+    fs.writeFileSync(outXmlFilePath, finalXml);
 }
 
 function processCategory(category) {
-    let refDefs = category['refinement-definitions'];
+    // let refDefs = category['refinement-definitions'];
     let customAttrs = object.resolve(category, 'custom-attributes.0.custom-attribute');
+    let categoryId = category.$['category-id'];
+
+    if (categoryId === 'root') {
+        return true;
+    }
+
     let urls = [
         `$url('Search-Show', 'cgid', 'luggage')$`,
         `$url('Search-Show', 'cgid', 'backpack')$`,
@@ -52,19 +66,29 @@ function processCategory(category) {
         `$url('Search-Show', 'cgid', 'accessories')$`
     ];
 
+    let urlRegExps = [
+        /\$url\('Search-Show', 'cgid', 'luggage'\)\$\w+/g,
+        /\$url\('Search-Show', 'cgid', 'backpack'\)\$\w+/g,
+        /\$url\('Search-Show', 'cgid', 'bag'\)\$\w+/g,
+        /\$url\('Search-Show', 'cgid', 'accessories'\)\$\w+/g
+    ]
+
     if (Array.isArray(customAttrs)) {
         customAttrs = customAttrs.filter(attr => {
             let matchAttr = attr.$ && attr.$['attribute-id'] === 'alternativeUrl';
+            if (!matchAttr) {
+                return false;
+            }
             let matchVal = attr._ && urls.some(url => {
                 return attr._.includes(url);
+                // return url.test(attr._);
             });
-            return matchAttr && matchVal;
+            return matchVal;
         });
         object.set(category, 'custom-attributes.0.custom-attribute', customAttrs);
     }
 
-    if (refDefs
-        || (Array.isArray(customAttrs) && customAttrs.length > 0)) {
+    if (Array.isArray(customAttrs) && customAttrs.length > 0) {
         return true;
     }
 
