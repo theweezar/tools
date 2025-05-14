@@ -76,3 +76,14 @@ exports.set = function (object, path, value) {
         this.set(result[prop], nextPropPath, value);
     }
 };
+
+/**
+ * Remove property from object
+ * @param {Object} obj - JSON object
+ * @param {string} prop - The property to remove
+ */
+exports.remove = function (obj, prop) {
+    if (obj && prop && Object.hasOwnProperty.call(obj, prop)) {
+        delete obj[prop];
+    }
+};

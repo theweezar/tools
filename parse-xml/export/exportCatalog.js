@@ -3,6 +3,7 @@
 const path = require('path');
 const fs = require('fs');
 const helpers = require('../helpers/helpers');
+const object = require('../lib/object');
 const cwd = process.cwd();
 
 const categoryIdsToKeep = [
@@ -24,12 +25,6 @@ const categoryIdsToKeep = [
     'accessories-warm'
 ];
 
-function remove(obj, prop) {
-    if (Object.hasOwnProperty.call(obj, prop)) {
-        delete obj[prop];
-    }
-}
-
 async function main() {
     const catalog = 'hk-samsonite';
     const base = 'sfcc/webdav/SE20-594_staging_backup_configs';
@@ -37,9 +32,9 @@ async function main() {
     const outXmlFilePath = path.join(cwd, `${base}/catalogs/${catalog}`, `20250512_SE20-594_filtered_catalog_${catalog}.xml`);
     const fullXmlObj = await helpers.xmlToJSON(xmlFilePath);
 
-    remove(fullXmlObj.catalog, 'header');
-    remove(fullXmlObj.catalog, 'category-assignment');
-    remove(fullXmlObj.catalog, 'product');
+    object.remove(fullXmlObj.catalog, 'header');
+    object.remove(fullXmlObj.catalog, 'category-assignment');
+    object.remove(fullXmlObj.catalog, 'product');
 
     const categories = fullXmlObj.catalog.category;
 
