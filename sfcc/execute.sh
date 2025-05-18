@@ -8,7 +8,7 @@ src_instance="development-asia-samsonite.demandware.net"
 
 impex_base="impex/src/instance"
 
-file_name="20250505_SE20-594_configs"
+file_name="SE20-5533_configs_all_at_hs_gre"
 
 local_folder="./webdav"
 

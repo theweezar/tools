@@ -12,7 +12,7 @@ const cwd = process.cwd();
  */
 function removeFields(obj) {
     Object.keys(obj).forEach(key => {
-        const keyToKeep = ['$', 'custom-attributes', 'refinement-definitions'];
+        const keyToKeep = ['$', 'custom-attributes', 'refinement-definitions', 'page-attributes'];
         if (!keyToKeep.includes(key)) {
             object.remove(obj, key);
         }
@@ -20,9 +20,9 @@ function removeFields(obj) {
 }
 
 async function main() {
-    const catalog = 'kr-samsonite';
-    const xmlFilePath = path.join(cwd, `sfcc/webdav/SE20-594_dev_configs/catalogs/${catalog}/catalog.xml`);
-    const outXmlFilePath = path.join(cwd, `sfcc/webdav/SE20-594_dev_configs/catalogs/${catalog}`, `20250518_SE20-594_filtered_catalog_${catalog}.xml`);
+    const catalog = 'au-americantourister';
+    const xmlFilePath = path.join(cwd, `sfcc/webdav/SE20-5533_configs_all_at_hs_gre/catalogs/${catalog}/catalog.xml`);
+    const outXmlFilePath = path.join(cwd, `sfcc/webdav/SE20-5533_configs_all_at_hs_gre/catalogs/${catalog}`, `SE20-5533_filtered_catalog_${catalog}.xml`);
     const fullXmlObj = await helpers.xmlToJSON(xmlFilePath);
 
     object.remove(fullXmlObj.catalog, 'header');
@@ -38,6 +38,7 @@ async function main() {
     });
 
     console.log('Filtered categories:', filteredCategories.length);
+    console.log('Exported to file:', path.basename(outXmlFilePath));
 
     fullXmlObj.catalog.category = filteredCategories;
     const finalXml = helpers.buildXML(fullXmlObj);
@@ -51,27 +52,38 @@ function processCategory(category) {
 
     if (categoryId === 'root') return true;
 
-    // let urls = [
-    //     `$url('Search-Show', 'cgid', 'luggage')$`,
-    //     `$url('Search-Show', 'cgid', 'backpack')$`,
-    //     `$url('Search-Show', 'cgid', 'bag')$`,
-    //     `$url('Search-Show', 'cgid', 'accessories')$`
-    // ];
-
     let re = /\$url\('Search-Show', 'cgid', '(luggage|backpack|bag|accessories)'\)\$(\S+)/g;
 
     if (Array.isArray(customAttrs)) {
         customAttrs = customAttrs.filter(attr => {
             let matchAttr = object.resolve(attr, '$.attribute-id') === 'alternativeUrl';
-            // return matchAttr && attr._ && urls.some(url => {
-            //     return attr._.includes(url);
-            // });
-            return matchAttr && attr._ && re.test(attr._);
+            return matchAttr && attr._ && re.test(String(attr._).trim());
         });
 
         object.set(category, 'custom-attributes.0.custom-attribute', customAttrs);
 
-        if (customAttrs.length > 0) return true;
+        if (customAttrs.length > 0) {
+            let pageUrl = {
+                'page-url': [
+                    {
+                        _: '',
+                        $: {
+                            'xml:lang': 'x-default'
+                        }
+                    },
+                    {
+                        _: '',
+                        $: {
+                            'xml:lang': 'en-AU'
+                        }
+                    }
+                ]
+            }
+
+            object.set(category, 'page-attributes', [pageUrl]);
+
+            return true;
+        }
     }
 
     return false;
