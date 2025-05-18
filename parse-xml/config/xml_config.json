@@ -1,10 +1,8 @@
 {
-    "catalog": {
-        "category": {
-            "refinement-definitions": true,
-            "custom-attributes": {
-                "@attribute-id=alternativeUrl": true
-            }
+    "query": [
+        {
+            "field": "parent.0",
+            "exp": "value ~= colorExp or value ~= sizeExp"
         }
-    }
+    ]
 }
