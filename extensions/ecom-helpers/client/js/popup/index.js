@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * This function retrieves the active tab and executes a script to show Product IDs (PIDs) on the page.
+ * It queries the active tab, checks if it is a Search-Show page, and then prepends a div with the PID to each product tile.
+ */
 async function showPIDs() {
     let tabs = await chrome.tabs.query({ active: true });
     let tab = tabs[0];
@@ -24,7 +28,7 @@ async function showPIDs() {
              * @param {string} pid - The Product ID
              */
             let prependDivToTile = (tile, pid) => {
-                let wrapper = tile.querySelector('.product-tile .tile-body .tile-group-left');
+                let wrapper = tile.querySelector('.product-tile .tile-body');
                 if (!wrapper) {
                     return;
                 }
@@ -42,13 +46,11 @@ async function showPIDs() {
                 wrapper.prepend(div);
             };
 
-            let pids = Array.from(productTiles).map(tile => {
-                let pid = tile.getAttribute('data-pid');
-                prependDivToTile(tile, pid);
+            Array.from(productTiles).map(tile => {
+                let pid = tile.querySelector('.image-container a')?.href;
+                prependDivToTile(tile, pid.split('/').pop());
                 return pid;
             });
-
-            console.log(pids.join('\n'));
         },
         world: 'MAIN'
     });
