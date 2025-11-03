@@ -8,11 +8,11 @@ src_instance="development-asia-samsonite.demandware.net"
 
 impex_base="impex/src/instance"
 
-file_name="SE20-5533_configs_all_at_hs_gre"
+file_name="20250620_dev_ss-catalogs"
 
 local_folder="./webdav"
 
-target_instance="***"
+# target_instance="***"
 
 npx sfcc-ci auth:login
 

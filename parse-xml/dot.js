@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * Set value to object by dot
@@ -8,20 +8,20 @@
  * @returns {void}
  */
 const set = (source, path, value) => {
-    let dotIdx = path.indexOf('.');
+  let dotIdx = path.indexOf(".");
 
-    // No more child -> current path is target property
-    if (dotIdx === -1) {
-        source[path] = value;
-        return;
-    }
+  // No more child -> current path is target property
+  if (dotIdx === -1) {
+    source[path] = value;
+    return;
+  }
     
-    let prop = path.substring(0, dotIdx);
-    let newPath = path.substring(dotIdx + 1);
+  let prop = path.substring(0, dotIdx);
+  let newPath = path.substring(dotIdx + 1);
 
-    if (!source[prop] || typeof source[prop] !== 'object') source[prop] = {};
+  if (!source[prop] || typeof source[prop] !== "object") source[prop] = {};
     
-    return set(source[prop], newPath, value);
+  return set(source[prop], newPath, value);
 };
 
 /**
@@ -30,20 +30,20 @@ const set = (source, path, value) => {
  * @param {string} path - JSON path seperated by dot
  */
 const remove = (source, path) => {
-    let dotIdx = path.indexOf('.');
+  let dotIdx = path.indexOf(".");
 
-    // No more child -> current path is target property
-    if (dotIdx === -1) {
-        delete source[path];
-        return;
-    }
+  // No more child -> current path is target property
+  if (dotIdx === -1) {
+    delete source[path];
+    return;
+  }
     
-    let prop = path.substring(0, dotIdx);
-    let newPath = path.substring(dotIdx + 1);
+  let prop = path.substring(0, dotIdx);
+  let newPath = path.substring(dotIdx + 1);
 
-    if (!source[prop]) return;
+  if (!source[prop]) return;
     
-    return remove(source[prop], newPath);
+  return remove(source[prop], newPath);
 };
 
 /**
@@ -53,20 +53,20 @@ const remove = (source, path) => {
  * @returns {*} - any value
  */
 const getProp = (source, path) => {
-    if (!source || !path) return null;
+  if (!source || !path) return null;
 
-    let cloneObj = source;
-    let props = path.split('.');
-    if (cloneObj) while (props.length) {
-        let prop = props.shift();
-        cloneObj = cloneObj[prop];
-        if (!cloneObj) break;
-    }
-    return cloneObj;
-}
+  let cloneObj = source;
+  let props = path.split(".");
+  if (cloneObj) while (props.length) {
+    let prop = props.shift();
+    cloneObj = cloneObj[prop];
+    if (!cloneObj) break;
+  }
+  return cloneObj;
+};
 
 module.exports = {
-    set,
-    remove,
-    getProp
+  set,
+  remove,
+  getProp
 };

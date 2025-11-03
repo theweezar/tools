@@ -1,20 +1,20 @@
-'use strict';
+"use strict";
 
-const UnlimitedObject = require('./lib/unlimited-object');
+const UnlimitedObject = require("./lib/unlimited-object");
 
 function doTest() {
-    const testData = Array.from({ length: 5000 }, (_, i) => i + 1);
-    const uObject = new UnlimitedObject(2000);
+  const testData = Array.from({ length: 5000 }, (_, i) => i + 1);
+  const uObject = new UnlimitedObject(2000);
 
-    const cb = (currData, inData) => {
-        if (inData % 2 === 0) return `even_${inData}`;
-        return inData;
-    }
+  const cb = (currData, inData) => {
+    if (inData % 2 === 0) return `even_${inData}`;
+    return inData;
+  };
 
-    testData.forEach((el, idx) => {
-        uObject.set(`key${idx}`, el, cb);
-    });
-    console.log(uObject.getTotalKeys());
+  testData.forEach((el, idx) => {
+    uObject.set(`key${idx}`, el, cb);
+  });
+  console.log(uObject.getTotalKeys());
 }
 
 doTest();

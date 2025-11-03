@@ -1,7 +1,16 @@
 {
-    "sites": {
-        "<site ID>": {
-            "site_preferences" : true
-        }
+    "catalogs": {
+        "au-samsonite": true,
+        "hk-samsonite": true,
+        "in-samsonite": true,
+        "id-samsonite": true,
+        "jp-samsonite": true,
+        "kr-samsonite": true,
+        "my-samsonite": true,
+        "nz-samsonite": true,
+        "ph-samsonite": true,
+        "sg-samsonite": true,
+        "th-samsonite": true,
+        "tw-samsonite": true
     }
 }

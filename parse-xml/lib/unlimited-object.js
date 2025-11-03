@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * Creates an instance of UnlimitedObject to manage key-value storage with quotas.
@@ -6,17 +6,17 @@
  * @param {number} unitQuota - Maximum number of keys allowed per storage unit.
  */
 function UnlimitedObject(unitQuota) {
-    this.units = [{}];
-    this.unitQuota = unitQuota;
-    this.updateUnitInfo();
+  this.units = [{}];
+  this.unitQuota = unitQuota;
+  this.updateUnitInfo();
 }
 
 /**
  * Updates unit information when creating a new unit.
  */
 UnlimitedObject.prototype.updateUnitInfo = function () {
-    this.currentIndex = this.units.length - 1;
-    this.totalUnits = this.units.length;
+  this.currentIndex = this.units.length - 1;
+  this.totalUnits = this.units.length;
 };
 
 /**
@@ -27,11 +27,11 @@ UnlimitedObject.prototype.updateUnitInfo = function () {
  * @param {Function} [transform] - Optional callback function for transformation.
  */
 UnlimitedObject.prototype.handleData = function (unitIndex, key, value, transform) {
-    if (transform && typeof transform === 'function') {
-        this.units[unitIndex][key] = transform(this.units[unitIndex][key], value);
-    } else {
-        this.units[unitIndex][key] = value;
-    }
+  if (transform && typeof transform === "function") {
+    this.units[unitIndex][key] = transform(this.units[unitIndex][key], value);
+  } else {
+    this.units[unitIndex][key] = value;
+  }
 };
 
 /**
@@ -41,20 +41,20 @@ UnlimitedObject.prototype.handleData = function (unitIndex, key, value, transfor
  * @param {Function} [transform] - Optional callback function for data transformation.
  */
 UnlimitedObject.prototype.set = function (key, value, transform) {
-    for (var i = 0; i < this.totalUnits; i++) {
-        if (this.units[i][key]) {
-            this.handleData(i, key, value, transform);
-            return;
-        }
+  for (var i = 0; i < this.totalUnits; i++) {
+    if (this.units[i][key]) {
+      this.handleData(i, key, value, transform);
+      return;
     }
+  }
 
-    // Check if the last unit key length reaches quota
-    if (Object.keys(this.units[this.currentIndex]).length >= this.unitQuota) {
-        this.units.push({});
-        this.updateUnitInfo();
-    }
+  // Check if the last unit key length reaches quota
+  if (Object.keys(this.units[this.currentIndex]).length >= this.unitQuota) {
+    this.units.push({});
+    this.updateUnitInfo();
+  }
 
-    this.handleData(this.currentIndex, key, value, transform);
+  this.handleData(this.currentIndex, key, value, transform);
 };
 
 /**
@@ -63,10 +63,10 @@ UnlimitedObject.prototype.set = function (key, value, transform) {
  * @returns {*} The value associated with the key, or undefined if not found.
  */
 UnlimitedObject.prototype.get = function (key) {
-    for (var i = 0; i < this.totalUnits; i++) {
-        if (this.units[i][key]) return this.units[i][key];
-    }
-    return undefined;
+  for (var i = 0; i < this.totalUnits; i++) {
+    if (this.units[i][key]) return this.units[i][key];
+  }
+  return undefined;
 };
 
 /**
@@ -74,9 +74,9 @@ UnlimitedObject.prototype.get = function (key) {
  * @returns {number} - Total number of keys.
  */
 UnlimitedObject.prototype.getTotalKeys = function () {
-    return this.units.reduce(function (total, unit) {
-        return total + Object.keys(unit).length
-    }, 0);
+  return this.units.reduce(function (total, unit) {
+    return total + Object.keys(unit).length;
+  }, 0);
 };
 
 module.exports = UnlimitedObject;
