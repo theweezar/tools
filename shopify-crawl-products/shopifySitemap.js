@@ -6,7 +6,14 @@ const fs = require("fs");
 const { promisify } = require("util");
 const path = require("path");
 const cwd = process.cwd();
-const outputfolder = path.join(cwd, "ignore/shopify/master");
+const config = require("./config.json");
+const outputfolder = path.join(cwd, config.sitemap.output);
+const isHtmlMode = config.sitemap.mode === "html";
+
+// Ensure output folder exists
+if (!fs.existsSync(outputfolder)) {
+  fs.mkdirSync(outputfolder, { recursive: true });
+}
 
 // Convert xml2js.parseString to promise-based function
 const parseXML = promisify(xml2js.parseString);
@@ -32,8 +39,8 @@ const findProductSitemapUrl = (sitemapIndex) => {
 
 /**
  * Extract product URLs from sitemap
- * @param {Object} sitemap 
- * @returns {Array}
+ * @param {Object} sitemap - XML sitemap object
+ * @returns {Array} - array of product URLs
  */
 const extractProductUrls = (sitemap) => {
   const urls = sitemap.urlset.url || [];
@@ -42,11 +49,11 @@ const extractProductUrls = (sitemap) => {
 
 /**
  * Transform product URL to API URL and extract filename
- * @param {string} url 
- * @returns {Object}
+ * @param {string} url - product URL
+ * @returns {Object} - contains apiUrl and filename
  */
 const transformProductUrl = (url) => ({
-  apiUrl: `${url}.js`,
+  apiUrl: isHtmlMode ? url : `${url}.js`,
   filename: url.split("/").pop()
 });
 
@@ -54,14 +61,19 @@ const transformProductUrl = (url) => ({
 const fetchAndSaveProduct = async ({ apiUrl, filename }) => {
   try {
     const response = await axios.get(apiUrl);
-    const cleanFilename = filename.replace(/\.[^/.]+$/, ""); // Remove file extension
-    const filepath = path.join(outputfolder, `${cleanFilename}.json`);
-    fs.writeFileSync(filepath, JSON.stringify(response.data, null, 2));
+    const cleanFilename = filename.replace(/\.[^/.]+$/, "");
+    const ext = isHtmlMode ? ".html" : ".json";
+    const filepath = path.join(outputfolder, `${cleanFilename}${ext}`);
+    fs.writeFileSync(filepath, isHtmlMode ? response.data : JSON.stringify(response.data, null, 2));
     console.log(`Successfully saved: ${filepath}`);
   } catch (error) {
     console.error(`Error processing ${apiUrl}:`, error.message);
   }
 };
+
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 // Main execution flow
 const processSitemap = async (sitemapUrl) => {
@@ -83,14 +95,16 @@ const processSitemap = async (sitemapUrl) => {
       .map(transformProductUrl)
       .filter(obj => obj.filename !== "");
 
+    console.log(`Found ${productUrls.length} product URL(s).`);
     // Process products in parallel with concurrency limit
     const concurrencyLimit = 3;
     let breakLimit = 0;
     for (let i = 0; i < productUrls.length; i += concurrencyLimit) {
       const batch = productUrls.slice(i, i + concurrencyLimit);
       await Promise.all(batch.map(fetchAndSaveProduct));
+      await sleep(100);
       breakLimit++;
-      // if (breakLimit === 2) break;
+      // if (breakLimit === 1) break;
     }
 
     console.log("All products processed successfully");
