@@ -6,7 +6,6 @@ const { createArrayCsvWriter } = require("csv-writer");
 const cheerio = require("cheerio");
 const cwd = process.cwd();
 const config = require("./config.json");
-const headerFile = path.join(__dirname, "header.txt");
 const outputFile = path.join(cwd, config.csv.output || "products.csv");
 
 /**
@@ -124,12 +123,22 @@ function buildMainMap(headers) {
    * @returns {string|null} field value or null
    */
   const getFirstVariantValue = (product, field) => {
-    return (Array.isArray(product.variants) && product.variants.length > 0) ? (product.variants[0][field] || null) : null;
+    return (
+      product && field && typeof field === "string"
+      && Array.isArray(product.variants) && product.variants.length > 0
+    ) ? (product.variants[0][field] || null) : null;
   };
 
-  const joinTags = (tags) => (Array.isArray(tags) ? tags.map(tag => {
-    return String(tag).split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
-  }).join(",") : "");
+  const has = (obj, prop) => {
+    return (obj && obj[prop] && typeof obj[prop] !== "undefined" && obj[prop] !== null);
+    // return (obj && obj[prop]);
+  };
+
+  const splitSku = (sku) => {
+    if (typeof sku !== "string") return "";
+    const parts = sku.split("_");
+    return parts.length > 1 ? parts[1] : sku;
+  };
 
   /**
    * Get mapping function by header name
@@ -147,11 +156,12 @@ function buildMainMap(headers) {
       case "Vendor":
         return (p, isMaster) => isMaster ? "FUSION" : "";
       case "Product Category":
-        return () => "";
+        return (p, isMaster) => isMaster ? "Apparel & Accessories" : ""; // hard code to generate gender field
       case "Type":
         return (p, isMaster) => isMaster ? (p.type || "") : "";
       case "Tags":
-        return (p, isMaster) => isMaster ? joinTags(p.tags) : "";
+        // return (p, isMaster) => isMaster ? joinTags(p.tags) : "";
+        return (p, isMaster) => isMaster && has(p, "_tags") ? p._tags : "";
       case "Published":
         return (p, isMaster) => (p.published_at && isMaster ? "TRUE" : "");
       case "Option1 Name":
@@ -159,7 +169,7 @@ function buildMainMap(headers) {
       case "Option1 Value":
         return (p, isMaster) => {
           if (isMaster) return (getFirstVariantValue(p, "option1") || "").toUpperCase();
-          return (p && p._variant && p._variant.option1 ? p._variant.option1 : "").toUpperCase();
+          return (has(p, "_variant") && p._variant.option1 ? p._variant.option1 : "").toUpperCase();
         };
       case "Option1 Linked To":
         return () => "";
@@ -168,7 +178,7 @@ function buildMainMap(headers) {
       case "Option2 Value":
         return (p, isMaster) => {
           if (isMaster) return (getFirstVariantValue(p, "option2") || "").toUpperCase();
-          return (p && p._variant && p._variant.option2 ? p._variant.option2 : "").toUpperCase();
+          return (has(p, "_variant") && p._variant.option2 ? p._variant.option2 : "").toUpperCase();
         };
       case "Option2 Linked To":
         return () => "";
@@ -177,29 +187,20 @@ function buildMainMap(headers) {
       case "Option3 Value":
         return (p, isMaster) => {
           if (isMaster) return (getFirstVariantValue(p, "option3") || "").toUpperCase();
-          return (p && p._variant && p._variant.option3 ? p._variant.option3 : "").toUpperCase();
+          return (has(p, "_variant") && p._variant.option3 ? p._variant.option3 : "").toUpperCase();
         };
       case "Option3 Linked To":
         return () => "";
       case "Variant SKU":
         return (p, isMaster) => {
-          const splitSku = (sku) => {
-            if (typeof sku !== "string") return "";
-            const parts = sku.split("_");
-            return parts.length > 1 ? parts[1] : sku;
-          };
-          if (isMaster && Array.isArray(p.variants) && p.variants.length > 0) {
-            return splitSku(p.variants[0].sku) || "";
-          }
-          if (!isMaster && p._variant) {
-            return splitSku(p._variant.sku) || "";
-          }
+          if (isMaster) return splitSku(getFirstVariantValue(p, "sku")) || "";
+          if (!isMaster && has(p, "_variant")) return splitSku(p._variant.sku) || "";
           return "";
         };
       case "Variant Grams":
         return (p, isMaster) => {
           if (isMaster) return (Number(getFirstVariantValue(p, "weight")) || 0);
-          return (p && p._variant && p._variant.weight ? Number(p._variant.weight) : 0);
+          return (has(p, "_variant") && p._variant.weight ? Number(p._variant.weight) : 0);
         };
       case "Variant Inventory Tracker":
         return (p, isMaster) => "shopify";
@@ -226,7 +227,7 @@ function buildMainMap(headers) {
       case "Variant Barcode":
         return (p, isMaster) => {
           if (isMaster) return getFirstVariantValue(p, "barcode") || "";
-          return p._variant ? (p._variant.barcode || "") : "";
+          return has(p, "_variant") ? (p._variant.barcode || "") : "";
         };
       case "Image Src":
         return (p, isMaster) => {
@@ -234,7 +235,7 @@ function buildMainMap(headers) {
             const first = getFirstVariantValue(p, "featured_image");
             return first ? first.src || "" : "";
           }
-          return (p._variant && p._variant.featured_image ? (p._variant.featured_image.src || "") : "");
+          return (has(p, "_variant") && p._variant.featured_image ? (p._variant.featured_image.src || "") : "");
         };
       case "Image Position":
         return (p, isMaster) => {
@@ -242,7 +243,7 @@ function buildMainMap(headers) {
             const first = getFirstVariantValue(p, "featured_image");
             return first ? first.position || "" : "";
           }
-          return (p._variant && p._variant.featured_image ? (p._variant.featured_image.position || "") : "");
+          return (has(p, "_variant") && p._variant.featured_image ? (p._variant.featured_image.position || "") : "");
         };
       case "Image Alt Text":
         return (p, isMaster) => {
@@ -250,7 +251,7 @@ function buildMainMap(headers) {
             const first = getFirstVariantValue(p, "featured_image");
             return first ? first.alt || "" : "";
           }
-          return (p._variant && p._variant.featured_image ? (p._variant.featured_image.alt || "") : "");
+          return (has(p, "_variant") && p._variant.featured_image ? (p._variant.featured_image.alt || "") : "");
         };
       case "Gift Card":
         return (p, isMaster) => isMaster ? (p.gift_card ? "TRUE" : "FALSE") : "";
@@ -267,7 +268,11 @@ function buildMainMap(headers) {
           return metaTags.description || "";
         };
       case "Google Shopping / Google Product Category":
+        return () => "";
       case "Google Shopping / Gender":
+        return (p, isMaster) => {
+          return isMaster && has(p, "gender") ? p.gender : "";
+        };
       case "Google Shopping / Age Group":
       case "Google Shopping / MPN":
       case "Google Shopping / Condition":
@@ -280,7 +285,11 @@ function buildMainMap(headers) {
       case "Google: Custom Product (product.metafields.mm-google-shopping.custom_product)":
       case "Product rating count (product.metafields.reviews.rating_count)":
       case "Color (product.metafields.shopify.color-pattern)":
+        return () => "";
       case "Target gender (product.metafields.shopify.target-gender)":
+        return (p, isMaster) => {
+          return isMaster && has(p, "gender") ? p.gender : "";
+        };
       case "Complementary products (product.metafields.shopify--discovery--product_recommendation.complementary_products)":
       case "Related products (product.metafields.shopify--discovery--product_recommendation.related_products)":
       case "Related products settings (product.metafields.shopify--discovery--product_recommendation.related_products_display)":
@@ -292,7 +301,7 @@ function buildMainMap(headers) {
             const first = getFirstVariantValue(p, "featured_image");
             return first ? first.src || "" : "";
           }
-          return (p._variant && p._variant.featured_image ? (p._variant.featured_image.src || "") : "");
+          return (has(p, "_variant") && p._variant.featured_image ? (p._variant.featured_image.src || "") : "");
         };
       case "Variant Weight Unit":
       case "Variant Tax Code":
@@ -327,43 +336,98 @@ function buildMediaMapByID(product) {
   return map;
 }
 
+function joinLowerTags(product) {
+  if (!product) return "";
+  const tags = product.tags;
+  return Array.isArray(tags) ? tags.join(";").toLowerCase() : "";
+}
+
+function collectGender(product) {
+  if (!product) return "";
+  const lowerTags = joinLowerTags(product);
+  if (lowerTags.includes("unisex")) return "female; unisex; male";
+  else if (lowerTags.includes("women")) return "female";
+  else if (lowerTags.includes("men")) return "male";
+  return "";
+}
+
+function collectTags(product) {
+  if (!product) return "";
+  const lowerTags = joinLowerTags(product);
+  const title = product && product.title ? String(product.title).toLowerCase() : "";
+  const description = product && product.description ? String(product.description).toLowerCase() : "";
+
+  const search = (tagMap) => {
+    for (let idx in tagMap) {
+      const tagConfig = tagMap[idx];
+      const kw = tagConfig.keywords;
+      if (
+        lowerTags.includes(kw)
+        || title.includes(kw)
+        || description.includes(kw)
+      ) return tagConfig.tag;
+    }
+    return "";
+  };
+
+  const genderTag = search(config.csv.tag.gender);
+  const activityTag = search(config.csv.tag.activity);
+  const otherTag = search(config.csv.tag.other);
+
+  return [genderTag, activityTag, otherTag].filter(Boolean).join(", ");
+}
+
 function processProducts() {
   const productFiles = listFiles(config.csv.entry, ".json");//.slice(0, 1);
-  const raw = fs.readFileSync(headerFile, "utf8");
-  const headers = raw.split(/\r?\n/).map((h) => h.trim()).filter(Boolean);
+  const { headers } = require("./header");
+  const counters = { products: 0, variants: 0 };
   const mainMap = buildMainMap(headers);
-
   const csvWriter = createArrayCsvWriter({
     header: mainMap.map(entry => entry.header),
     path: outputFile
   });
-  const records = [];
+  const processRecord = async (record) => {
+    await csvWriter.writeRecords([record]);
+  };
 
-  let counters = { products: 0, variants: 0 };
+  const processProductFiles = async () => {
+    for (let i = 0; i < productFiles.length; i++) {
+      const file = productFiles[i];
+      const product = require(file);
+      const html = readHtml(file);
+      const mediaMap = buildMediaMapByID(product);
+      const gender = collectGender(product);
+      const tags = collectTags(product);
+      const additional = {
+        html,
+        mediaMap,
+        gender,
+        _tags: tags
+      };
+      const masterData = Object.assign({}, product, { _variant: null }, { ...additional });
+      const masterRow = mainMap.map((entry) => entry.map(masterData, true));
 
-  productFiles.forEach((file) => {
-    const product = require(file);
-    counters.products += 1;
+      counters.products += 1;
+      await processRecord(masterRow);
 
-    const html = readHtml(file);
-    const mediaMap = buildMediaMapByID(product);
-    const masterData = Object.assign({}, product, { _variant: null }, { html: html, mediaMap: mediaMap });
-    const masterRow = mainMap.map((entry) => entry.map(masterData, true));
-    records.push(masterRow);
+      // Variant rows
+      const variants = Array.isArray(product.variants) ? product.variants.slice(1) : [];
 
-    // Variant rows
-    const variants = Array.isArray(product.variants) ? product.variants.slice(1) : [];
-    variants.forEach((variant) => {
-      counters.variants += 1;
-      const variantData = Object.assign({}, product, { _variant: variant }, { html: html, mediaMap: mediaMap });
-      const row = mainMap.map((entry) => entry.map(variantData, false));
-      records.push(row);
-    });
-  });
+      for (let j = 0; j < variants.length; j++) {
+        counters.variants += 1;
+        const variant = variants[j];
+        const variantData = Object.assign({}, masterData, { _variant: variant });
+        const variantRow = mainMap.map((entry) => entry.map(variantData, false));
+        await processRecord(variantRow);
+      }
 
-  csvWriter.writeRecords(records).then(() => {
-    console.log(`Wrote ${counters.products} products and ${counters.variants} variants to ${outputFile}`);
-  });
+      console.log(`[${i + 1}]\tDone...${product.title}`);
+    }
+  };
+
+  processProductFiles()
+    .then(() => console.log(`\nWrote ${counters.products} products and ${counters.variants} variants to ${outputFile}`))
+    .catch(error => console.error(error));
 }
 
 if (require.main === module) {
