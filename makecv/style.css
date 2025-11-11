@@ -7,6 +7,14 @@ section {
   margin-bottom: 2rem;
 }
 
+p {
+  line-height: 18px;
+}
+
+li::marker {
+  color: #3e3e3e;
+}
+
 #root {
   display: flex;
   scale: 1;
@@ -29,7 +37,7 @@ section {
   width: 940px;
   height: 1330px;
   box-sizing: border-box;
-  padding: 50px;
+  padding: 75px;
   margin: auto;
   overflow: visible;
   position: relative;
@@ -40,6 +48,7 @@ section {
   margin-top: 0;
   margin-bottom: 4px;
   font-weight: 500;
+  font-size: 40px;
 }
 
 .personal h2 {
@@ -81,17 +90,30 @@ section {
   font-weight: 500;
   font-size: 22px;
   border-bottom: 3px solid #19273c;
-  margin-bottom: 10px;
+  margin-bottom: 1rem;
   font-family: "Rubik", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
+  padding-bottom: 4px;
+  text-transform: uppercase;
 }
 
 .profile ul {
   margin-top: 10px;
   padding-left: 18px;
   font-size: 14px;
-  line-height: 18px;
+  color: #3e3e3e;
+}
+
+.divider {
+  height: 1px;
+  display: block;
+  border-bottom: 1px dashed #ccc;
+}
+
+.profile p {
+  margin-top: 0;
+  margin-bottom: 4px;
 }
 
 .tech-skills ul {
@@ -99,19 +121,19 @@ section {
   padding-left: 0;
   list-style-type: none;
   font-size: 14px;
-  line-height: 18px;
 }
 
 .tech-skills ul li {
   margin-bottom: 8px;
 }
 
-.tech-skills ul li>div {
-  margin-bottom: 4px;
+.tech-skills ul li .divider {
+  margin: 12px 0;
 }
 
 .tech-skills ul li p.label {
   margin: 0;
+  margin-bottom: 6px;
   color: #c4881c;
   font-size: 16px;
   font-weight: 700;
@@ -125,23 +147,15 @@ section {
   color: #3e3e3e;
   font-size: 15px;
   font-weight: 400;
-  padding: 5px 0;
   font-family: "Inter", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
-}
-
-.divider {
-  height: 1px;
-  display: block;
-  border-bottom: 1px dashed #ccc;
 }
 
 .experience .exp-role {
   color: #19273c;
   font-size: 18px;
   font-weight: 500;
-  line-height: 22px;
   margin-bottom: 4px;
   font-family: "Rubik", sans-serif;
 }
@@ -150,7 +164,6 @@ section {
   color: #c4881c;
   font-size: 16px;
   font-weight: 700;
-  line-height: 20px;
   margin-bottom: 4px;
   font-family: "Inter", sans-serif;
 }
@@ -171,13 +184,13 @@ section {
   color: #3e3e3e;
   font-size: 13px;
   font-weight: normal;
-  line-height: 17px;
   display: flex;
   align-items: center;
 }
 
 .experience .exp-time span:nth-child(1),
-.experience .exp-where span:nth-child(1) {
+.experience .exp-where span:nth-child(1),
+.experience .exp-url span:nth-child(1) {
   margin-right: 4px;
   transform: translateY(1px);
 }
@@ -185,9 +198,8 @@ section {
 .experience ul {
   margin-top: 0;
   margin-bottom: 0;
-  padding-left: 1.5rem;
+  padding-left: 18px;
   font-size: 14px;
-  line-height: 18px;
   font-family: "Inter", sans-serif;
 }
 
@@ -195,7 +207,20 @@ section {
   color: #3e3e3e;
   margin: 0;
   margin-bottom: 4px;
-  line-height: 18px;
+}
+
+.experience .exp-url {
+  color: #3e3e3e;
+  font-size: 13px;
+  font-family: "Inter", sans-serif;
+  margin-bottom: 4px;
+}
+
+.experience .list-title {
+  color: #3e3e3e;
+  font-size: 14px;
+  font-family: "Inter", sans-serif;
+  margin-bottom: 4px;
 }
 
 .experience .divider {
@@ -234,7 +259,7 @@ section {
   max-width: 45px;
 }
 
-.achievements .item .icon{
+.achievements .item .icon {
   font-size: 30px;
   color: #c4881c;
 }
@@ -247,7 +272,6 @@ section {
 .achievements .item p.label {
   font-size: 16px;
   font-weight: 700;
-  line-height: 20px;
   color: #19273c;
   margin-bottom: 6px;
 }
@@ -255,7 +279,42 @@ section {
 .achievements .item p.desc {
   font-size: 14px;
   font-weight: 500;
-  line-height: 18px;
   color: #3e3e3e;
   min-height: 54px;
+}
+
+.education .major {
+  font-size: 18px;
+  font-weight: 700;
+  color: #19273c;
+  margin-bottom: 4px;
+}
+
+.education .where {
+  font-size: 16px;
+  font-weight: 700;
+  color: #c4881c;
+  margin-bottom: 4px;
+}
+
+.education .date {
+  font-size: 13px;
+  color: #3e3e3e;
+}
+
+.education .date span:nth-child(1) {
+  margin-right: 4px;
+  transform: translateY(1px);
+}
+
+.certifications .name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #19273c;
+  margin-bottom: 4px;
+}
+
+.certifications .company {
+  font-size: 14px;
+  color: #3e3e3e;
 }
