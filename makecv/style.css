@@ -1,0 +1,261 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+section {
+  margin-bottom: 2rem;
+}
+
+#root {
+  display: flex;
+  scale: 1;
+}
+
+.rubik {
+  font-family: "Rubik", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.inter {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.page {
+  background: white;
+  width: 940px;
+  height: 1330px;
+  box-sizing: border-box;
+  padding: 50px;
+  margin: auto;
+  overflow: visible;
+  position: relative;
+  /* border: 1px solid black; */
+}
+
+.personal h1 {
+  margin-top: 0;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.personal h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: #c4881c;
+  font-weight: 500;
+  font-size: 21px;
+}
+
+.personal p {
+  font-size: 13px;
+  margin: 0;
+}
+
+.personal .contact {
+  display: flex;
+  flex-direction: row;
+}
+
+.personal .contact i {
+  transform: translateY(1px);
+  color: #c4881c;
+  margin-right: 2px;
+  font-size: 12px;
+}
+
+.personal .contact div {
+  margin-right: 2rem;
+  font-size: 13px;
+  font-weight: 700;
+  color: #3e3e3e;
+  display: flex;
+  align-items: center;
+}
+
+.section-title {
+  color: #19273c;
+  font-weight: 500;
+  font-size: 22px;
+  border-bottom: 3px solid #19273c;
+  margin-bottom: 10px;
+  font-family: "Rubik", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.profile ul {
+  margin-top: 10px;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.tech-skills ul {
+  margin-top: 0;
+  padding-left: 0;
+  list-style-type: none;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.tech-skills ul li {
+  margin-bottom: 8px;
+}
+
+.tech-skills ul li>div {
+  margin-bottom: 4px;
+}
+
+.tech-skills ul li p.label {
+  margin: 0;
+  color: #c4881c;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: "Rubik", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.tech-skills ul li p.list {
+  margin: 0;
+  color: #3e3e3e;
+  font-size: 15px;
+  font-weight: 400;
+  padding: 5px 0;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.divider {
+  height: 1px;
+  display: block;
+  border-bottom: 1px dashed #ccc;
+}
+
+.experience .exp-role {
+  color: #19273c;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 22px;
+  margin-bottom: 4px;
+  font-family: "Rubik", sans-serif;
+}
+
+.experience .exp-company {
+  color: #c4881c;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 20px;
+  margin-bottom: 4px;
+  font-family: "Inter", sans-serif;
+}
+
+.experience .exp-row {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 4px;
+  font-family: "Inter", sans-serif;
+}
+
+.experience .exp-time {
+  margin-right: 15px;
+}
+
+.experience .exp-time,
+.experience .exp-where {
+  color: #3e3e3e;
+  font-size: 13px;
+  font-weight: normal;
+  line-height: 17px;
+  display: flex;
+  align-items: center;
+}
+
+.experience .exp-time span:nth-child(1),
+.experience .exp-where span:nth-child(1) {
+  margin-right: 4px;
+  transform: translateY(1px);
+}
+
+.experience ul {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-left: 1.5rem;
+  font-size: 14px;
+  line-height: 18px;
+  font-family: "Inter", sans-serif;
+}
+
+.experience ul p {
+  color: #3e3e3e;
+  margin: 0;
+  margin-bottom: 4px;
+  line-height: 18px;
+}
+
+.experience .divider {
+  margin: 1rem 0;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.col-6 {
+  flex: 0 0 50%;
+  max-width: 50%;
+}
+
+.achievements .row .col-6:nth-child(1) {
+  padding-right: 8px;
+}
+
+.achievements .row .col-6:nth-child(2) {
+  padding-left: 8px;
+}
+
+.achievements .item {
+  display: flex;
+}
+
+.achievements .divider {
+  margin: 1rem 0;
+}
+
+.achievements .item .icon-wrapper {
+  /* text-align: center; */
+  flex: 0 0 45px;
+  max-width: 45px;
+}
+
+.achievements .item .icon{
+  font-size: 30px;
+  color: #c4881c;
+}
+
+.achievements .item p {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+}
+
+.achievements .item p.label {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 20px;
+  color: #19273c;
+  margin-bottom: 6px;
+}
+
+.achievements .item p.desc {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 18px;
+  color: #3e3e3e;
+  min-height: 54px;
+}

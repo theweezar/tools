@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint ./**/*.js",
-    "lint:fix": "eslint ./**/*.js --fix"
+    "lint:fix": "eslint ./**/*.js --fix",
+    "build": "npx webpack --config \"webpack.config.js\""
   },
   "repository": {
     "type": "git",
@@ -18,25 +19,41 @@
   },
   "homepage": "https://github.com/theweezar/tools#readme",
   "dependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/plugin-proposal-optional-chaining": "^7.21.0",
+    "@babel/plugin-transform-for-of": "^7.27.1",
+    "@babel/plugin-transform-optional-chaining": "^7.28.5",
+    "@babel/plugin-transform-runtime": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
     "@supercharge/strings": "^2.0.0",
     "adm-zip": "^0.5.16",
     "axios": "^1.13.1",
+    "babel-loader": "^10.0.0",
     "cheerio": "^1.1.2",
     "commander": "^14.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "css-loader": "^7.1.2",
     "csv-writer": "^1.6.0",
     "express": "^5.1.0",
     "extract-zip": "^2.0.1",
     "filtrex": "^3.1.0",
     "json-2-csv": "^5.5.10",
+    "mini-css-extract-plugin": "^2.9.4",
     "moment": "^2.30.1",
     "node-fetch": "^3.3.2",
+    "postcss-loader": "^8.2.0",
+    "sass": "^1.93.3",
+    "sass-loader": "^16.0.6",
     "sfcc-ci": "^2.12.0",
     "shelljs": "^0.10.0",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.102.1",
+    "webpack-cli": "^6.0.1",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
+    "@eslint/compat": "^1.4.1",
     "eslint": "^9.39.0",
     "globals": "^16.5.0"
   }
