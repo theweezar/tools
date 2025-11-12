@@ -32,36 +32,37 @@ li::marker {
   font-style: normal;
 }
 
+.divider {
+  height: 1px;
+  display: block;
+  border-bottom: 1px dashed #ccc;
+}
+
 .page {
   background: white;
   width: 940px;
   height: 1330px;
   box-sizing: border-box;
-  padding: 75px;
+  padding: 60px;
   margin: auto;
   overflow: visible;
   position: relative;
   /* border: 1px solid black; */
 }
 
-.personal h1 {
+.personal .name {
   margin-top: 0;
   margin-bottom: 4px;
   font-weight: 500;
-  font-size: 40px;
+  font-size: 3rem;
 }
 
-.personal h2 {
+.personal .position {
   margin-top: 0;
   margin-bottom: 8px;
   color: #c4881c;
   font-weight: 500;
-  font-size: 21px;
-}
-
-.personal p {
-  font-size: 13px;
-  margin: 0;
+  font-size: 20px;
 }
 
 .personal .contact {
@@ -70,15 +71,15 @@ li::marker {
 }
 
 .personal .contact i {
-  transform: translateY(1px);
+  transform: translateY(2px);
   color: #c4881c;
-  margin-right: 2px;
-  font-size: 12px;
+  margin-right: 3px;
+  font-size: 14px;
 }
 
 .personal .contact div {
   margin-right: 2rem;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: #3e3e3e;
   display: flex;
@@ -101,19 +102,13 @@ li::marker {
 .profile ul {
   margin-top: 10px;
   padding-left: 18px;
-  font-size: 14px;
   color: #3e3e3e;
-}
-
-.divider {
-  height: 1px;
-  display: block;
-  border-bottom: 1px dashed #ccc;
 }
 
 .profile p {
   margin-top: 0;
   margin-bottom: 4px;
+  font-size: 14px;
 }
 
 .tech-skills ul {
@@ -145,7 +140,7 @@ li::marker {
 .tech-skills ul li p.list {
   margin: 0;
   color: #3e3e3e;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 400;
   font-family: "Inter", sans-serif;
   font-optical-sizing: auto;
@@ -182,8 +177,8 @@ li::marker {
 .experience .exp-time,
 .experience .exp-where {
   color: #3e3e3e;
-  font-size: 13px;
-  font-weight: normal;
+  font-size: 14px;
+  font-weight: 700;
   display: flex;
   align-items: center;
 }
@@ -193,6 +188,10 @@ li::marker {
 .experience .exp-url span:nth-child(1) {
   margin-right: 4px;
   transform: translateY(1px);
+}
+
+.experience .exp-url span:nth-child(1) {
+  margin-right: 0;
 }
 
 .experience ul {
@@ -211,7 +210,7 @@ li::marker {
 
 .experience .exp-url {
   color: #3e3e3e;
-  font-size: 13px;
+  font-size: 14px;
   font-family: "Inter", sans-serif;
   margin-bottom: 4px;
 }
@@ -238,11 +237,13 @@ li::marker {
 }
 
 .achievements .row .col-6:nth-child(1) {
-  padding-right: 8px;
+  padding-right: 12px;
+  max-width: calc(50% - 12px);
 }
 
 .achievements .row .col-6:nth-child(2) {
-  padding-left: 8px;
+  padding-left: 12px;
+  max-width: calc(50% - 12px);
 }
 
 .achievements .item {
@@ -280,7 +281,7 @@ li::marker {
   font-size: 14px;
   font-weight: 500;
   color: #3e3e3e;
-  min-height: 54px;
+  min-height: 55px;
 }
 
 .education .major {
@@ -298,7 +299,8 @@ li::marker {
 }
 
 .education .date {
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 700;
   color: #3e3e3e;
 }
 
