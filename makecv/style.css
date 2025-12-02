@@ -77,13 +77,26 @@ li::marker {
   font-size: 14px;
 }
 
-.personal .contact div {
-  margin-right: 2rem;
-  font-size: 14px;
+.personal .contact>div {
+  margin-right: 1rem;
+  font-size: 13px;
   font-weight: 700;
   color: #3e3e3e;
   display: flex;
   align-items: center;
+}
+
+.personal .contact>div:nth-child(1) {
+  margin-right: 0;
+  flex: 0 0 150px;
+  max-width: 150px;
+}
+
+.personal .contact a {
+  font-size: 13px;
+  font-weight: 700;
+  color: #3e3e3e;
+  text-decoration: none;
 }
 
 .section-title {
@@ -314,6 +327,13 @@ li::marker {
   font-weight: 700;
   color: #19273c;
   margin-bottom: 4px;
+}
+
+.certifications .name a {
+  font-size: 16px;
+  font-weight: 700;
+  color: #19273c;
+  text-decoration: none;
 }
 
 .certifications .company {

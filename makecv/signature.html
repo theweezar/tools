@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body style="margin: 0;">
+  <table
+    style="font-family: Tahoma, Geneva, Verdana, sans-serif;border-collapse: collapse;font-size: 13px;padding: 0;margin: 0;">
+    <tr>
+      <td style="font-weight: bold;">HOANG PHAN MINH DUC</td>
+    </tr>
+    <tr>
+      <td>Ho Chi Minh City, Vietnam</td>
+    </tr>
+    <tr>
+      <td>(+84) 935 723 714</td>
+    </tr>
+  </table>
+
+  <table style="margin-top: 4px; border-collapse: collapse;">
+    <tr>
+      <td>
+        <a style="display: block; width: 24px; height: 24px; background-color: #fff;"
+          href="https://www.linkedin.com/in/duc-hoang-922172235/" target="_blank">
+          <img style="width: 24px; height: 24px;" alt="" src="./icons/resized/24px/cropped_circle_image_linkedin.png" />
+        </a>
+      </td>
+      <td>
+        <a style="display: block; width: 24px; height: 24px; margin-left: 4px; background-color: #fff;"
+          href="https://zalo.me/0935723714/" target="_blank">
+          <img style="width: 24px; height: 24px;" alt="" src="./icons/resized/24px/cropped_circle_image_zalo.png" />
+        </a>
+      </td>
+    </tr>
+  </table>
+
+</body>
+
+</html>
+<script>
+  function imageSrcToBase64(imageUrl) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+
+      fetch(imageUrl)
+        .then(res => res.blob())
+        .then(blob => reader.readAsDataURL(blob));
+    });
+  }
+
+  function main() {
+    document.querySelectorAll("img").forEach(img => {
+      imageSrcToBase64(img.src)
+        .then(base64 => {
+          img.src = base64;
+        });
+    });
+  }
+
+  main();
+</script>

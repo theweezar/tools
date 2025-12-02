@@ -1,0 +1,282 @@
+[
+  {
+    "type": "PERSONAL",
+    "data": {
+      "name": "HOANG PHAN MINH DUC",
+      "title": "Full-Stack Developer | PHP, Java, JavaScript/Node.js, SFCC",
+      "detail": {
+        "email": "hpmduc3010@gmail.com",
+        "phone": "0935723714",
+        "linkedin": "https://linkedin.com/in/duc-hoang-922172235/",
+        "dob": "30/10/1999",
+        "location": "Gia Dinh Ward, Ho Chi Minh, Vietnam"
+      }
+    }
+  },
+  {
+    "type": "PROFILE",
+    "title": "Profile",
+    "data": {
+      "summary": "I'm a Full-Stack Developer with 4+ years of experience in the B2C e-commerce domain across the APAC region, skilled in JavaScript, Node.js, and PHP, with strong expertise in developing, maintaining online storefronts, and collaborating with cross-functional teams to design and deliver end-to-end solutions that align with business goals.Currently, I'm actively seeking opportunities to grow as a Full-Stack Developer while contributing to the company's success and delivering high-quality solutions."
+    }
+  },
+  {
+    "type": "SKILLS",
+    "title": "Technical Skills",
+    "data": [
+      {
+        "title": "programming_languages",
+        "skills": [
+          "JavaScript",
+          "PHP",
+          "Java",
+          "Python"
+        ]
+      },
+      {
+        "title": "frameworks_libraries",
+        "skills": [
+          "Laravel",
+          "WordPress",
+          "SFRA",
+          "jQuery",
+          "Bootstrap",
+          "React.js",
+          "Next.js",
+          "Node.js",
+          "Express.js",
+          "Webpack",
+          "ESLint",
+          "Spring Boot"
+        ]
+      },
+      {
+        "title": "databases",
+        "skills": [
+          "MySQL",
+          "MSSQL Server"
+        ]
+      },
+      {
+        "title": "platforms",
+        "skills": [
+          "SFCC",
+          "Shopify",
+          "Emarsys",
+          "Google Analytics",
+          "Google Tag Manager",
+          "Relate",
+          "Jenkins",
+          "GitHub",
+          "Bitbucket"
+        ]
+      },
+      {
+        "title": "tools",
+        "skills": [
+          "Jira",
+          "Redmine",
+          "Git"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "EXPERIENCE",
+    "title": "Experience",
+    "data": [
+      {
+        "title": "Associate Technical Architect",
+        "company": "Globee Software & E-Commerce",
+        "duration": "06/2024 - 08/2025",
+        "location": "Ho Chi Minh City, Vietnam",
+        "tech_stacks": "JavaScript, Node.js, Webpack, jQuery, Bootstrap, SFCC, Jenkins, GitHub Action.",
+        "responsibilities": [
+          "Delivered technical solutions for new functionalities, integrations, and bug fixes in Enhancement projects, while analyzing requirements to evaluate technical and business impacts.",
+          "Led a team of 5–7 developers to develop and successfully deliver Revamp projects across multiple brands and countries, new integration plugins for payment gateways (Stripe, AMEX, Cybersource, atone, Paynamics), OMS, and shipping services.",
+          "Implemented ESLint, Bitbucket pipelines for linter and code deployment automation.",
+          "Conducted code reviews, approved pull requests, implemented Webpack, set up Jenkins to build and deploy code to higher environments, including Development and Staging, for all SFRA projects.",
+          "Developed automation tools using Node.js to deploy configurations to higher and sandbox environments.",
+          "Collaborated with IT teams to merge forked pull requests and release code to Production.",
+          "Collaborated with CRM, regional, and local teams to design high-level system architecture.",
+          "Collaborated with PM, BA, QA, and external teams to define ticket's scope, timeline and break tasks.",
+          "Monitored systems to proactively detect, troubleshoot, and resolve issues, ensuring uninterrupted website operations and positive customer experiences.",
+          "Monitored post-release website performance and implemented enhancements to improve stability and user experience.",
+          "Implemented GitHub Actions workflows to monitor site uptime to take action immediately to downtime incidents."
+        ]
+      },
+      {
+        "title": "Senior Full-stack Developer",
+        "company": "Globee Software & E-Commerce",
+        "duration": "02/2023 - 06/2024",
+        "location": "Ho Chi Minh City, Vietnam",
+        "tech_stacks": "JavaScript, Node.js, Webpack, jQuery, Bootstrap, SFCC, Jenkins.",
+        "responsibilities": [
+          "Provided technical solutions and contributed to development in the Revamp projects.",
+          "Supported code review, ensuring alignment with architecture standards and coding conventions defined by Tech team.",
+          "Reviewed functional documentation, provided technical guidance, and mentored team members as needed.",
+          "Acted as Technical Architect for support and enhancement tasks."
+        ]
+      },
+      {
+        "title": "Full-stack Developer",
+        "company": "Globee Software & E-Commerce",
+        "duration": "08/2021 - 02/2023",
+        "location": "Ho Chi Minh City, Vietnam",
+        "tech_stacks": "JavaScript, Node.js, Webpack, jQuery, Bootstrap, SFCC, PHP, WordPress.",
+        "responsibilities": [
+          "Worked as a main developer to develop E-Commerce sites across the APAC region.",
+          "Developed, maintained, and managed B2C E-commerce websites by working with Salesforce Commerce Cloud (SFCC) platform.",
+          "Integrated external systems: Order Management System, Payment Gateway, Loyalty System, Marketing System, Google Analytics, Google Tag Manager, Social Login.",
+          "Set up campaigns, promotions, and landing pages.",
+          "Supported teammates and partners in system integration testing (SIT).",
+          "Used JIRA to manage tasks and communicate with teammates.",
+          "Created and maintained technical documentation, including configuration, API guides, and release notes.",
+          "Utilized PHP, WordPress to revamp UI for the Kerry Consulting project."
+        ]
+      },
+      {
+        "title": "Full-stack Developer",
+        "company": "TECPRO Services Startup",
+        "duration": "08/2022 - 02/2023",
+        "location": "Ho Chi Minh City, Vietnam",
+        "tech_stacks": "JavaScript, Node.js, Webpack, jQuery, Bootstrap, PHP, Laravel, MySQL.",
+        "responsibilities": [
+          "Utilized Laravel to develop an Education website, MySQL for data management, and C-Panel to manage and deploy the website to shared hosting.",
+          "Developed PHP packages following the PSR-4 standard and hosted them on Packagist."
+        ]
+      },
+      {
+        "title": "Intern Full-stack Developer",
+        "company": "Globee Software & E-Commerce",
+        "duration": "04/2021 - 07/2021",
+        "location": "Ho Chi Minh City, Vietnam",
+        "tech_stacks": "JavaScript, Node.js, Webpack, jQuery, Bootstrap, SFCC.",
+        "responsibilities": [
+          "Learned about the development process, Salesforce Commerce Cloud, and the E-commerce business logic.",
+          "Maintained websites."
+        ]
+      }
+    ]
+  },
+  {
+    "type": "ACHIEVEMENTS",
+    "title": "Achievements",
+    "data": [
+      {
+        "title": "Checkout Experience Improvement",
+        "description": "Integrated Stripe, enhancing checkout experience and increasing payment success rate to 98%."
+      },
+      {
+        "title": "Successful Multiple System Integrations",
+        "description": "Led the development and launch of multiple integrations: Stripe, AMEX, Cybersource, Paynamics, OMS."
+      },
+      {
+        "title": "UI Revamp & Revenue Growth",
+        "description": "Led the team in developing and launching a revamped UI across multiple sites, boosting revenue by 20%."
+      },
+      {
+        "title": "Successful Site Launches",
+        "description": "Successfully launched 3 E-Commerce sites in 8 months."
+      }
+    ]
+  },
+  {
+    "type": "SKILLS",
+    "title": "Soft Skills",
+    "data": [
+      {
+        "title": "Teamwork",
+        "skills": [
+          "Collaborate effectively with cross-functional teams to deliver high-quality solutions."
+        ]
+      },
+      {
+        "title": "Leadership",
+        "skills": [
+          "Lead the team through multiple enhancements",
+          "Mentor interns and junior developers."
+        ]
+      },
+      {
+        "title": "Project Planning & Scheduling",
+        "skills": [
+          "Support in breaking requests into tasks",
+          "Defining dependencies",
+          "And estimating time for each."
+        ]
+      },
+      {
+        "title": "Time Management",
+        "skills": [
+          "Work closely with PM and BA to prioritize tasks",
+          "Avoid delays",
+          "And ensure tasks meet deadlines."
+        ]
+      },
+      {
+        "title": "Problem Solving",
+        "skills": [
+          "Troubleshoot and resolve issues effectively",
+          "Ensuring the website runs smoothly without interruptions."
+        ]
+      }
+    ]
+  },
+  {
+    "type": "EDUCATION",
+    "title": "Education",
+    "data": [
+      {
+        "degree": "Bachelor's degree, Computer and Information Systems Security",
+        "institution": "Posts and Telecommunications Institute of Technology",
+        "duration": "08/2017 - 05/2022"
+      }
+    ]
+  },
+  {
+    "type": "CERTIFICATIONS",
+    "title": "Certifications",
+    "data": [
+      "B2C Commerce Developer (Salesforce)",
+      "Google Analytics Certification (Google Digital Academy (Skillshop))"
+    ]
+  },
+  {
+    "type": "PROJECTS",
+    "title": "Projects",
+    "data": [
+      {
+        "name": "5DLA Store",
+        "date": "09/2025",
+        "url": "https://5dla.com/",
+        "location": "Ho Chi Minh City, Vietnam",
+        "summary": [
+          "Partnered with a Hong Kong client and a small team to set up and develop a Shopify site.",
+          "Customized UI components, integrated apps to align with brand requirements and improve user experience."
+        ]
+      },
+      {
+        "name": "B2C Store",
+        "date": "08/2025",
+        "url": "https://github.com/theweezar/b2cstore-java",
+        "location": "Ho Chi Minh City, Vietnam",
+        "summary": [
+          "Developed a demo B2C e-commerce website using Java, Spring Boot, Thymeleaf, JavaScript, and jQuery.",
+          "Leveraged GitHub Copilot to explore AI-assisted coding, improve prompting skills, and accelerate development.",
+          "Utilized PostgreSQL for data management and persistence."
+        ]
+      },
+      {
+        "name": "Dien Quang Landing Page",
+        "date": "01/2021 - 03/2021",
+        "url": "https://welcome.dienquang.com/",
+        "location": "Ho Chi Minh City, Vietnam",
+        "summary": [
+          "Utilized HTML, CSS, JavaScript, and jQuery to develop the landing page UI.",
+          "Utilized PHP and MySQL to develop a CRUD application to manage the landing page content."
+        ]
+      }
+    ]
+  }
+]
