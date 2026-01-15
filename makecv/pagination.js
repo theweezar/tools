@@ -1,5 +1,9 @@
 "use strict";
 
+function log(...args) {
+  console.log("[Paginator]", ...args);
+}
+
 class Paginator {
   constructor(config) {
     this.initCfg(config);
@@ -27,7 +31,8 @@ class Paginator {
       ...mergedCfg,
       usable
     };
-    console.log("Paginator: Configuration initialized", this.config);
+    log("Paginator: Configuration initialized");
+    log(this.config);
   }
 
   /**
@@ -155,17 +160,27 @@ class Paginator {
     let tempSection;
 
     const noBreak = this.getCfg("noBreakElementClass");
+
+    /**
+     * Check if a height exceeds the usable space
+     * @param {number} height - Height to check
+     * @returns {boolean} True if height exceeds usable space, false otherwise
+     */
     const exceedsUsable = (height) => {
       return height > this.getCfg("usable");
     };
+
+    /**
+     * Add a new page and reset current height
+     */
     const addNewPage = () => {
       currentPage = this.createPage();
       currentHeight = 0;
     };
 
     /**
-     * 
-     * @param {Element} section 
+     * Shallow clone a section element, keeping only its title if present
+     * @param {Element} section - Section element to clone
      */
     const shallowCloneTempSection = (section) => {
       const title = section.querySelector(".section-title");
@@ -173,9 +188,16 @@ class Paginator {
       if (title) tempSection.appendChild(title.cloneNode(true));
     };
 
+    const getSectionTitle = (section) => {
+      const titleEl = section.querySelector(".section-title");
+      return titleEl ? titleEl.textContent.trim() : "Untitled Section";
+    };
+
     addNewPage();
 
     for (const section of sections) {
+      log("Processing section:", getSectionTitle(section));
+
       // CASE 1: Section does NOT contain .no-break => treat normally
       if (!section.querySelector(noBreak)) {
         const sectionHeight = section.offsetHeight;
@@ -192,6 +214,10 @@ class Paginator {
       const items = Array.from(section.querySelectorAll(noBreak));
       shallowCloneTempSection(section);
 
+      if (items.length) {
+        log(`Section "${getSectionTitle(section)}" contains ${items.length} no-break items.`);
+      }
+
       for (let idx = 0; idx < items.length; idx++) {
         const item = items[idx];
         const itemHeight = item.offsetHeight;
@@ -204,19 +230,21 @@ class Paginator {
           pages.push(currentPage);
           addNewPage();
           shallowCloneTempSection(section);
+          log("Paginator: Created temp section for no-break items.", getSectionTitle(section));
         }
 
         const divider = this.createDivider();
+        const dividerHeight = 25; // offsetHeight does not include margins, so use fixed height
         tempSection.appendChild(item.cloneNode(true));
         tempSection.appendChild(divider);
-        currentHeight += itemHeight + divider.offsetHeight;
+        currentHeight += (itemHeight + dividerHeight);
 
         const nextItem = items[idx + 1];
         const nextItemHeight = nextItem ? nextItem.offsetHeight : 0;
         // Remove last divider, or when breaking new page
         if (
           exceedsUsable(currentHeight + nextItemHeight)
-          || idx == items.length - 1
+          || idx === items.length - 1
         ) {
           tempSection.removeChild(divider);
         }
@@ -246,7 +274,7 @@ class Paginator {
     const root = wrapper.parentElement;
     const paginator = new Paginator(config);
     const pages = paginator.paginate(wrapper);
-    console.log("Paginator: Created", pages.length, "pages.");
+    log("Paginator: Created", pages.length, "pages.");
 
     root.removeChild(wrapper);
     root.style.display = "block";
@@ -255,11 +283,13 @@ class Paginator {
 }
 
 (() => {
-  Paginator.run({
-    maxHeight: 1330,
-    maxWidth: 940,
-    paddingTop: 60,
-    paddingBottom: 60,
-    noBreakElementClass: ".no-break",
-  }, ".page");
+  document.addEventListener("DOMContentLoaded", () => {
+    Paginator.run({
+      maxHeight: 1330,
+      maxWidth: 940,
+      paddingTop: 60,
+      paddingBottom: 60,
+      noBreakElementClass: ".no-break",
+    }, ".page");
+  });
 })();

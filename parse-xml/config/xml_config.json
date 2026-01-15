@@ -1,8 +1,0 @@
-{
-    "query": [
-        {
-            "field": "parent.0",
-            "exp": "value ~= colorExp or value ~= sizeExp"
-        }
-    ]
-}

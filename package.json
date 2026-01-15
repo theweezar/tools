@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "eslint ./**/*.js",
     "lint:fix": "eslint ./**/*.js --fix",
-    "build": "npx webpack --config \"webpack.config.js\""
+    "build": "npx webpack --config \"webpack.config.js\"",
+    "build:idm": "pyinstaller --onefile --clean --name service --distpath \"D:/development/tools/idm\" idm/service.py && rm -rf \"D:/development/tools/idm/build\""
   },
   "repository": {
     "type": "git",
