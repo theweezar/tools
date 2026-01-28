@@ -1,55 +1,25 @@
 "use strict";
 
 const fs = require("fs");
+const path = require("path");
 const { Command } = require("commander");
 const termkit = require("terminal-kit");
 const term = termkit.terminal;
 
-/* ---------------- CLI ---------------- */
-
-const program = new Command();
-
-program
-  .requiredOption("-u, --url <url>", "Download URL")
-  .requiredOption("-o, --output <path>", "Output file path")
-  .option("-c, --chunks <number>", "Number of chunks", v => Number(v), 10)
-  .option("-p, --parallel <number>", "Max parallel downloads", v => Number(v), 5);
-
-program.parse();
-
-const options = program.opts();
-const { url, output, chunks, parallel } = options;
-const readers = [];
-let complete, fileHandle, exitTriggered;
-
-/**
- * Cleanup on exit
- */
-async function doExit() {
-  await closeHandle();
-  abortReaders();
-  if (!complete) {
-    term.red("Cleaning up incomplete file...");
-    removeIfNotComplete();
-  }
-}
-
-process.on("exit", doExit);
-
-const readline = require("readline");
-readline.emitKeypressEvents(process.stdin);
-if (process.stdin.isTTY) {
-  process.stdin.setRawMode(true);
-  process.stdin.resume();
-}
-process.stdin.on("keypress", async (str, key) => {
-  if (key.ctrl && key.name === "c") {
-    exitTriggered = true;
-    term.clear();
-    await doExit();
-    process.exit();
-  }
-});
+// process.on("exit", doExit);
+// require("readline").emitKeypressEvents(process.stdin);
+// if (process.stdin.isTTY) {
+//   process.stdin.setRawMode(true);
+//   process.stdin.resume();
+// }
+// process.stdin.on("keypress", async (str, key) => {
+//   if (key.ctrl && key.name === "c") {
+//     exitTriggered = true;
+//     term.clear();
+//     await doExit();
+//     process.exit();
+//   }
+// });
 
 /* ---------------- Helpers ---------------- */
 
@@ -100,125 +70,223 @@ function createProgressBars(count) {
   });
 }
 
-/**
- * Create and prepare file handle
- * @param {string} output Output file path
- * @param {number} size File size in bytes
- * @returns {Promise<fs.promises.FileHandle>} File handle
- */
-async function createFileHandle(output, size) {
-  const fh = await fs.promises.open(output, "w+");
-  await fh.truncate(size);
-  return fh;
-}
-
-/**
- * Close file handle if open
- */
-async function closeHandle() {
-  if (fileHandle) {
-    await fileHandle.close().catch(() => { });
-    fileHandle = null;
-  }
-};
-
-/**
- * Remove output file if download not complete
- */
-async function removeIfNotComplete() {
-  if (fs.existsSync(output)) {
-    fs.unlinkSync(output);
-  }
-};
-
-/**
- * Abort all active readers
- */
-function abortReaders() {
-  for (const reader of readers) {
-    reader.cancel().catch(() => { });
-  }
-}
-
 /* ---------------- Main logic ---------------- */
-/**
- * Download a single chunk
- * @param {string} url File URL
- * @param {{index: number, start: number, end: number}} chunk Chunk information
- * @param {fs.promises.FileHandle} fileHandle File handle for writing
- * @param {termkit.Terminal.ProgressBarController} bar Progress bar for this chunk
- */
-async function downloadChunk(url, chunk, fileHandle, bar) {
-  const res = await fetch(url, {
-    headers: { Range: `bytes=${chunk.start}-${chunk.end}` },
+
+class InternetDownloader {
+  constructor(url, output, chunks = 10, parallel = 5) {
+    this.url = url;
+    this.output = path.resolve(output);
+    this.chunks = chunks;
+    this.parallel = parallel;
+
+    this.complete = false;
+    this.fileHandle = null;
+    this.exitTriggered = false;
+    this.readers = [];
+
+    this.beforeDownloadCb = null;
+    this.chunkReadingCb = null;
+    this.chunkCompleteCb = null;
+  }
+
+  triggerExit() {
+    this.exitTriggered = true;
+  }
+
+  isExit() {
+    return this.exitTriggered;
+  }
+
+  triggerComplete() {
+    this.complete = true;
+  }
+
+  isComplete() {
+    return this.complete;
+  }
+
+  setBeforeDownloadCallback(cb) {
+    this.beforeDownloadCb = cb;
+  }
+
+  applyBeforeDownloadCallback(chunkList) {
+    if (this.beforeDownloadCb) {
+      this.beforeDownloadCb(chunkList);
+    }
+  }
+
+  setChunkReadingCallback(cb) {
+    this.chunkReadingCb = cb;
+  }
+
+  applyChunkReadingCallback(chunkIndex, downloaded, total) {
+    if (this.chunkReadingCb) {
+      this.chunkReadingCb(chunkIndex, downloaded, total);
+    }
+  }
+
+  setChunkCompleteCallback(cb) {
+    this.chunkCompleteCb = cb;
+  }
+
+  applyChunkCompleteCallback(chunkIndex) {
+    if (this.chunkCompleteCb) {
+      this.chunkCompleteCb(chunkIndex);
+    }
+  }
+
+  /**
+   * Create and prepare file handle
+   * @param {number} size File size in bytes
+   * @returns {Promise<fs.promises.FileHandle>} File handle
+   */
+  async createFileHandle(size) {
+    const fh = await fs.promises.open(this.output, "w+");
+    await fh.truncate(size);
+    this.fileHandle = fh;
+    console.log(`Created file: ${this.output} (${size} bytes)`);
+    return fh;
+  }
+
+  /**
+   * Close file handle if open
+   */
+  async closeHandle() {
+    if (this.fileHandle) {
+      await this.fileHandle.close().catch(() => { });
+      this.fileHandle = null;
+    }
+  }
+
+  /**
+   * Remove output file if download not complete
+   */
+  removeIfNotComplete() {
+    if (fs.existsSync(this.output)) {
+      fs.unlinkSync(this.output);
+    }
+  };
+
+  /**
+   * Abort all active readers
+   */
+  abortReaders() {
+    for (const reader of this.readers) {
+      reader.cancel().catch(() => { });
+    }
+  }
+
+  /**
+   * Cleanup on exit
+   */
+  async doExit() {
+    await this.closeHandle();
+    this.abortReaders();
+    if (!this.isComplete()) {
+      term.red("Cleaning up incomplete file...");
+      this.removeIfNotComplete();
+    }
+  }
+
+  /**
+   * Download a single chunk
+   * @param {{index: number, start: number, end: number}} chunk Chunk information
+   */
+  async downloadChunk(chunk) {
+    const res = await fetch(this.url, {
+      headers: { Range: `bytes=${chunk.start}-${chunk.end}` },
+    });
+
+    if (res.status !== 206) {
+      throw new Error(`Range not supported (status ${res.status})`);
+    }
+
+    const reader = res.body.getReader();
+    const total = chunk.end - chunk.start + 1;
+    let offset = chunk.start;
+    let downloaded = 0;
+    this.readers.push(reader);
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done || this.isExit()) {
+          reader.cancel();
+          break;
+        }
+        await this.fileHandle.write(value, 0, value.length, offset);
+        offset += value.length;
+        downloaded += value.length;
+        this.applyChunkReadingCallback(chunk.index, downloaded, total);
+      }
+    } catch (error) {
+      reader.cancel();
+      throw error;
+    }
+
+    if (this.isExit()) return;
+
+    reader.cancel();
+
+    this.applyChunkCompleteCallback(chunk.index);
+  }
+
+  /**
+   * Main download function
+   */
+  async download() {
+    try {
+      const size = await getFileSize(this.url);
+      const chunkList = createChunks(size, this.chunks);
+
+      await this.createFileHandle(size);
+
+      let index = 0;
+
+      const worker = async () => {
+        console.log("Worker started");
+        while (true) {
+          const i = index++;
+          if (i >= chunkList.length) break;
+          await this.downloadChunk(chunkList[i]);
+        }
+      };
+
+      this.applyBeforeDownloadCallback(chunkList);
+      await Promise.all(Array.from({ length: this.parallel }, worker));
+      await this.closeHandle();
+      this.triggerComplete();
+    } catch (err) {
+      await this.closeHandle();
+      await this.removeIfNotComplete();
+    }
+  }
+}
+
+/* ---------------- CLI ---------------- */
+const program = new Command();
+
+program
+  .requiredOption("-u, --url <url>", "Download URL")
+  .requiredOption("-o, --output <path>", "Output file path")
+  .option("-c, --chunks <number>", "Number of chunks", v => Number(v), 10)
+  .option("-p, --parallel <number>", "Max parallel downloads", v => Number(v), 5)
+  .action(async (options) => {
+    const { url, output, chunks, parallel } = options;
+    const downloader = new InternetDownloader(url, output, chunks, parallel);
+    let bars;
+
+    downloader.setBeforeDownloadCallback((chunkList) => {
+      bars = createProgressBars(chunkList.length);
+    });
+    downloader.setChunkReadingCallback((chunkIndex, downloaded, total) => {
+      bars[chunkIndex].update(downloaded / total);
+    });
+    downloader.setChunkCompleteCallback((chunkIndex) => {
+      bars[chunkIndex].update(1);
+    });
+
+    await downloader.download();
   });
 
-  if (res.status !== 206) {
-    throw new Error(`Range not supported (status ${res.status})`);
-  }
-
-  const reader = res.body.getReader();
-  const total = chunk.end - chunk.start + 1;
-  let offset = chunk.start;
-  let downloaded = 0;
-  readers.push(reader);
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done || exitTriggered) {
-        reader.cancel();
-        break;
-      }
-      await fileHandle.write(value, 0, value.length, offset);
-      offset += value.length;
-      downloaded += value.length;
-      bar.update(downloaded / total);
-    }
-  } catch (error) {
-    reader.cancel();
-    throw error;
-  }
-
-  if (exitTriggered) return;
-
-  bar.update(1);
-}
-
-/**
- * Main download function
- */
-async function downloadFile() {
-  try {
-    const size = await getFileSize(url);
-    const chunkList = createChunks(size, chunks);
-
-    term.green(`File size: ${size} bytes\nChunks: ${chunkList.length}, Parallel: ${parallel}`);
-
-    fileHandle = await createFileHandle(output, size);
-
-    let index = 0;
-    const bars = createProgressBars(chunkList.length);
-
-    async function worker() {
-      while (true) {
-        const i = index++;
-        if (i >= chunkList.length) break;
-        await downloadChunk(url, chunkList[i], fileHandle, bars[i]);
-      }
-    }
-
-    await Promise.all(Array.from({ length: parallel }, worker));
-    await closeHandle();
-    term.clear();
-    term.green("Download completed successfully");
-    complete = true;
-  } catch (err) {
-    term.clear();
-    term.red(`Error: ${err.message}`);
-    await closeHandle();
-    await removeIfNotComplete();
-  }
-}
-
-downloadFile();
+program.parse();

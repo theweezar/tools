@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Faker Form",
+  "version": "1.0.0",
+  "description": "Instantly fill form fields with realistic fake data for testing and development",
+  "permissions": [
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_icon": {
+      "16": "public/icons/icon_16.png",
+      "32": "public/icons/icon_32.png",
+      "48": "public/icons/icon_48.png",
+      "128": "public/icons/icon_128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["dist/content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "icons": {
+    "16": "public/icons/icon_16.png",
+    "32": "public/icons/icon_32.png",
+    "48": "public/icons/icon_48.png",
+    "128": "public/icons/icon_128.png"
+  }
+}

@@ -109,7 +109,7 @@ class Paginator {
       btn.style.display = "block";
     });
 
-    document.body.appendChild(btn);
+    // document.body.appendChild(btn);
     return btn;
   }
 
@@ -132,7 +132,7 @@ class Paginator {
     page.style.width = `${this.getCfg("maxWidth")}px`;
     page.style.height = `${this.getCfg("maxHeight")}px`;
     page.style.padding = `${this.getCfg("paddingTop")}px ${this.getCfg("paddingBottom")}px`;
-    page.style.border = "1px solid #ccc";
+    // page.style.border = "1px solid #ccc";
     return page;
   }
 
@@ -159,6 +159,7 @@ class Paginator {
     let currentHeight;
     let tempSection;
 
+    const sectionMargin = 0;
     const noBreak = this.getCfg("noBreakElementClass");
 
     /**
@@ -193,20 +194,28 @@ class Paginator {
       return titleEl ? titleEl.textContent.trim() : "Untitled Section";
     };
 
+    const getItemTitle = (item) => {
+      const titleEl = item.textContent.trim();
+      return titleEl ? titleEl.substr(0, 20).replace("\n", "").trim() + "..." : "";
+    };
+
     addNewPage();
 
     for (const section of sections) {
-      log("Processing section:", getSectionTitle(section));
+      const sectionTitle = getSectionTitle(section);
+
+      log("Processing section:", sectionTitle);
 
       // CASE 1: Section does NOT contain .no-break => treat normally
       if (!section.querySelector(noBreak)) {
-        const sectionHeight = section.offsetHeight;
+        const sectionHeight = section.offsetHeight + sectionMargin;
         if (exceedsUsable(currentHeight + sectionHeight)) {
           pages.push(currentPage);
           addNewPage();
         }
         currentPage.appendChild(section.cloneNode(true));
         currentHeight += sectionHeight;
+        log(`Section "${sectionTitle}" section height:`, sectionHeight);
         continue;
       }
 
@@ -215,14 +224,17 @@ class Paginator {
       shallowCloneTempSection(section);
 
       if (items.length) {
-        log(`Section "${getSectionTitle(section)}" contains ${items.length} no-break items.`);
+        log(`Section "${sectionTitle}" contains ${items.length} no-break items.`);
       }
 
       for (let idx = 0; idx < items.length; idx++) {
         const item = items[idx];
         const itemHeight = item.offsetHeight;
+        const title = getItemTitle(item);
+        const divider = this.createDivider();
+        const dividerHeight = 25; // offsetHeight does not include margins, so use fixed height
 
-        if (exceedsUsable(currentHeight + itemHeight)) {
+        if (exceedsUsable(currentHeight + itemHeight + dividerHeight)) {
           // Push the current section if it has content
           if (tempSection.children.length > 0) {
             currentPage.appendChild(tempSection);
@@ -230,20 +242,22 @@ class Paginator {
           pages.push(currentPage);
           addNewPage();
           shallowCloneTempSection(section);
-          log("Paginator: Created temp section for no-break items.", getSectionTitle(section));
+          log("Created temp section for no-break items.", getSectionTitle(section));
         }
 
-        const divider = this.createDivider();
-        const dividerHeight = 25; // offsetHeight does not include margins, so use fixed height
+
         tempSection.appendChild(item.cloneNode(true));
         tempSection.appendChild(divider);
         currentHeight += (itemHeight + dividerHeight);
 
         const nextItem = items[idx + 1];
         const nextItemHeight = nextItem ? nextItem.offsetHeight : 0;
+
+        log(`Current height of "${title}":`, currentHeight, "add nextItemHeight:", currentHeight + nextItemHeight + dividerHeight);
+
         // Remove last divider, or when breaking new page
         if (
-          exceedsUsable(currentHeight + nextItemHeight)
+          exceedsUsable(currentHeight + nextItemHeight + dividerHeight)
           || idx === items.length - 1
         ) {
           tempSection.removeChild(divider);
@@ -254,6 +268,8 @@ class Paginator {
       if (tempSection.children.length > 0) {
         currentPage.appendChild(tempSection);
       }
+
+      currentHeight += sectionMargin;
     }
 
     pages.push(currentPage);

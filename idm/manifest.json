@@ -1,0 +1,20 @@
+{
+  "name": "External Downloader Bridge",
+  "description": "Intercepts Chrome downloads and forwards them to an external downloader service",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "icons": {
+    "16": "icon/default_16.png",
+    "32": "icon/default_32.png",
+    "48": "icon/default_48.png",
+    "128": "icon/default_128.png"
+  },
+  "permissions": [
+    "downloads",
+    "downloads.shelf",
+    "nativeMessaging"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}

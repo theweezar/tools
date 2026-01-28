@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor: Cover Letter</title>
+  <script defer src="./dist/editor.js"></script>
+  <link rel="stylesheet" href="./dist/editor.css">
+</head>
+
+<body>
+  <div class="flex-wrapper">
+    <div class="container">
+      <form id="replacementForm">
+        <div class="form-group">
+          <label for="company">Company</label>
+          <input autocomplete="off" type="text" id="company" placeholder="Enter company name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="role">Role</label>
+          <input autocomplete="off" type="text" id="role" placeholder="Enter job role" required>
+        </div>
+      </form>
+
+      <div class="editor-wrapper">
+        <label for="editor">Editor</label>
+        <div id="editor"></div>
+      </div>
+
+      <div class="content-wrapper">
+        <label for="content">Content</label>
+        <div id="content"></div>
+      </div>
+
+      <div class="action">
+        <button type="button" id="copyBtn">Copy Content</button>
+        <div class="notification" id="notification">Copied to clipboard!</div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

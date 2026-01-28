@@ -1,0 +1,9 @@
+{
+  "name": "com.provider.downloader.app",
+  "description": "IDM Provider",
+  "path": "service.exe",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://abhkgdnpngefdjegcabfencmbjebingl/"
+  ]
+}

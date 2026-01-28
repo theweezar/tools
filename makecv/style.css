@@ -203,6 +203,11 @@ li::marker {
   transform: translateY(1px);
 }
 
+.experience .exp-url a {
+  color: #3e3e3e;
+  text-decoration: none;
+}
+
 .experience .exp-url span:nth-child(1) {
   margin-right: 0;
 }
