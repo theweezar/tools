@@ -1,7 +1,748 @@
 (() => {
+  var __create = Object.create;
   var __defProp = Object.defineProperty;
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __getProtoOf = Object.getPrototypeOf;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
   var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+  var __commonJS = (cb, mod) => function __require() {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  };
+  var __copyProps = (to, from, except, desc) => {
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (let key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    }
+    return to;
+  };
+  var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+    // If the importer is in node compatibility mode or this is not an ESM
+    // file that has been converted to a CommonJS file using a Babel-
+    // compatible transform (i.e. "__esModule" has not been set), then set
+    // "default" to the CommonJS "module.exports" for node compatibility.
+    isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+    mod
+  ));
   var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+
+  // node_modules/ret/lib/types.js
+  var require_types = __commonJS({
+    "node_modules/ret/lib/types.js"(exports, module) {
+      module.exports = {
+        ROOT: 0,
+        GROUP: 1,
+        POSITION: 2,
+        SET: 3,
+        RANGE: 4,
+        REPETITION: 5,
+        REFERENCE: 6,
+        CHAR: 7
+      };
+    }
+  });
+
+  // node_modules/ret/lib/sets.js
+  var require_sets = __commonJS({
+    "node_modules/ret/lib/sets.js"(exports) {
+      var types = require_types();
+      var INTS = () => [{ type: types.RANGE, from: 48, to: 57 }];
+      var WORDS = () => {
+        return [
+          { type: types.CHAR, value: 95 },
+          { type: types.RANGE, from: 97, to: 122 },
+          { type: types.RANGE, from: 65, to: 90 }
+        ].concat(INTS());
+      };
+      var WHITESPACE = () => {
+        return [
+          { type: types.CHAR, value: 9 },
+          { type: types.CHAR, value: 10 },
+          { type: types.CHAR, value: 11 },
+          { type: types.CHAR, value: 12 },
+          { type: types.CHAR, value: 13 },
+          { type: types.CHAR, value: 32 },
+          { type: types.CHAR, value: 160 },
+          { type: types.CHAR, value: 5760 },
+          { type: types.RANGE, from: 8192, to: 8202 },
+          { type: types.CHAR, value: 8232 },
+          { type: types.CHAR, value: 8233 },
+          { type: types.CHAR, value: 8239 },
+          { type: types.CHAR, value: 8287 },
+          { type: types.CHAR, value: 12288 },
+          { type: types.CHAR, value: 65279 }
+        ];
+      };
+      var NOTANYCHAR = () => {
+        return [
+          { type: types.CHAR, value: 10 },
+          { type: types.CHAR, value: 13 },
+          { type: types.CHAR, value: 8232 },
+          { type: types.CHAR, value: 8233 }
+        ];
+      };
+      exports.words = () => ({ type: types.SET, set: WORDS(), not: false });
+      exports.notWords = () => ({ type: types.SET, set: WORDS(), not: true });
+      exports.ints = () => ({ type: types.SET, set: INTS(), not: false });
+      exports.notInts = () => ({ type: types.SET, set: INTS(), not: true });
+      exports.whitespace = () => ({ type: types.SET, set: WHITESPACE(), not: false });
+      exports.notWhitespace = () => ({ type: types.SET, set: WHITESPACE(), not: true });
+      exports.anyChar = () => ({ type: types.SET, set: NOTANYCHAR(), not: true });
+    }
+  });
+
+  // node_modules/ret/lib/util.js
+  var require_util = __commonJS({
+    "node_modules/ret/lib/util.js"(exports) {
+      var types = require_types();
+      var sets = require_sets();
+      var CTRL = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^ ?";
+      var SLSH = { "0": 0, "t": 9, "n": 10, "v": 11, "f": 12, "r": 13 };
+      exports.strToChars = function(str) {
+        var chars_regex = /(\[\\b\])|(\\)?\\(?:u([A-F0-9]{4})|x([A-F0-9]{2})|(0?[0-7]{2})|c([@A-Z[\\\]^?])|([0tnvfr]))/g;
+        str = str.replace(chars_regex, function(s2, b2, lbs, a16, b16, c8, dctrl, eslsh) {
+          if (lbs) {
+            return s2;
+          }
+          var code = b2 ? 8 : a16 ? parseInt(a16, 16) : b16 ? parseInt(b16, 16) : c8 ? parseInt(c8, 8) : dctrl ? CTRL.indexOf(dctrl) : SLSH[eslsh];
+          var c2 = String.fromCharCode(code);
+          if (/[[\]{}^$.|?*+()]/.test(c2)) {
+            c2 = "\\" + c2;
+          }
+          return c2;
+        });
+        return str;
+      };
+      exports.tokenizeClass = (str, regexpStr) => {
+        var tokens = [];
+        var regexp = /\\(?:(w)|(d)|(s)|(W)|(D)|(S))|((?:(?:\\)(.)|([^\]\\]))-(?:\\)?([^\]]))|(\])|(?:\\)?([^])/g;
+        var rs, c2;
+        while ((rs = regexp.exec(str)) != null) {
+          if (rs[1]) {
+            tokens.push(sets.words());
+          } else if (rs[2]) {
+            tokens.push(sets.ints());
+          } else if (rs[3]) {
+            tokens.push(sets.whitespace());
+          } else if (rs[4]) {
+            tokens.push(sets.notWords());
+          } else if (rs[5]) {
+            tokens.push(sets.notInts());
+          } else if (rs[6]) {
+            tokens.push(sets.notWhitespace());
+          } else if (rs[7]) {
+            tokens.push({
+              type: types.RANGE,
+              from: (rs[8] || rs[9]).charCodeAt(0),
+              to: rs[10].charCodeAt(0)
+            });
+          } else if (c2 = rs[12]) {
+            tokens.push({
+              type: types.CHAR,
+              value: c2.charCodeAt(0)
+            });
+          } else {
+            return [tokens, regexp.lastIndex];
+          }
+        }
+        exports.error(regexpStr, "Unterminated character class");
+      };
+      exports.error = (regexp, msg) => {
+        throw new SyntaxError("Invalid regular expression: /" + regexp + "/: " + msg);
+      };
+    }
+  });
+
+  // node_modules/ret/lib/positions.js
+  var require_positions = __commonJS({
+    "node_modules/ret/lib/positions.js"(exports) {
+      var types = require_types();
+      exports.wordBoundary = () => ({ type: types.POSITION, value: "b" });
+      exports.nonWordBoundary = () => ({ type: types.POSITION, value: "B" });
+      exports.begin = () => ({ type: types.POSITION, value: "^" });
+      exports.end = () => ({ type: types.POSITION, value: "$" });
+    }
+  });
+
+  // node_modules/ret/lib/index.js
+  var require_lib = __commonJS({
+    "node_modules/ret/lib/index.js"(exports, module) {
+      var util = require_util();
+      var types = require_types();
+      var sets = require_sets();
+      var positions = require_positions();
+      module.exports = (regexpStr) => {
+        var i2 = 0, l3, c2, start = { type: types.ROOT, stack: [] }, lastGroup = start, last = start.stack, groupStack = [];
+        var repeatErr = (i3) => {
+          util.error(regexpStr, `Nothing to repeat at column ${i3 - 1}`);
+        };
+        var str = util.strToChars(regexpStr);
+        l3 = str.length;
+        while (i2 < l3) {
+          c2 = str[i2++];
+          switch (c2) {
+            // Handle escaped characters, inclues a few sets.
+            case "\\":
+              c2 = str[i2++];
+              switch (c2) {
+                case "b":
+                  last.push(positions.wordBoundary());
+                  break;
+                case "B":
+                  last.push(positions.nonWordBoundary());
+                  break;
+                case "w":
+                  last.push(sets.words());
+                  break;
+                case "W":
+                  last.push(sets.notWords());
+                  break;
+                case "d":
+                  last.push(sets.ints());
+                  break;
+                case "D":
+                  last.push(sets.notInts());
+                  break;
+                case "s":
+                  last.push(sets.whitespace());
+                  break;
+                case "S":
+                  last.push(sets.notWhitespace());
+                  break;
+                default:
+                  if (/\d/.test(c2)) {
+                    last.push({ type: types.REFERENCE, value: parseInt(c2, 10) });
+                  } else {
+                    last.push({ type: types.CHAR, value: c2.charCodeAt(0) });
+                  }
+              }
+              break;
+            // Positionals.
+            case "^":
+              last.push(positions.begin());
+              break;
+            case "$":
+              last.push(positions.end());
+              break;
+            // Handle custom sets.
+            case "[":
+              var not;
+              if (str[i2] === "^") {
+                not = true;
+                i2++;
+              } else {
+                not = false;
+              }
+              var classTokens = util.tokenizeClass(str.slice(i2), regexpStr);
+              i2 += classTokens[1];
+              last.push({
+                type: types.SET,
+                set: classTokens[0],
+                not
+              });
+              break;
+            // Class of any character except \n.
+            case ".":
+              last.push(sets.anyChar());
+              break;
+            // Push group onto stack.
+            case "(":
+              var group = {
+                type: types.GROUP,
+                stack: [],
+                remember: true
+              };
+              c2 = str[i2];
+              if (c2 === "?") {
+                c2 = str[i2 + 1];
+                i2 += 2;
+                if (c2 === "=") {
+                  group.followedBy = true;
+                } else if (c2 === "!") {
+                  group.notFollowedBy = true;
+                } else if (c2 !== ":") {
+                  util.error(
+                    regexpStr,
+                    `Invalid group, character '${c2}' after '?' at column ${i2 - 1}`
+                  );
+                }
+                group.remember = false;
+              }
+              last.push(group);
+              groupStack.push(lastGroup);
+              lastGroup = group;
+              last = group.stack;
+              break;
+            // Pop group out of stack.
+            case ")":
+              if (groupStack.length === 0) {
+                util.error(regexpStr, `Unmatched ) at column ${i2 - 1}`);
+              }
+              lastGroup = groupStack.pop();
+              last = lastGroup.options ? lastGroup.options[lastGroup.options.length - 1] : lastGroup.stack;
+              break;
+            // Use pipe character to give more choices.
+            case "|":
+              if (!lastGroup.options) {
+                lastGroup.options = [lastGroup.stack];
+                delete lastGroup.stack;
+              }
+              var stack = [];
+              lastGroup.options.push(stack);
+              last = stack;
+              break;
+            // Repetition.
+            // For every repetition, remove last element from last stack
+            // then insert back a RANGE object.
+            // This design is chosen because there could be more than
+            // one repetition symbols in a regex i.e. `a?+{2,3}`.
+            case "{":
+              var rs = /^(\d+)(,(\d+)?)?\}/.exec(str.slice(i2)), min, max;
+              if (rs !== null) {
+                if (last.length === 0) {
+                  repeatErr(i2);
+                }
+                min = parseInt(rs[1], 10);
+                max = rs[2] ? rs[3] ? parseInt(rs[3], 10) : Infinity : min;
+                i2 += rs[0].length;
+                last.push({
+                  type: types.REPETITION,
+                  min,
+                  max,
+                  value: last.pop()
+                });
+              } else {
+                last.push({
+                  type: types.CHAR,
+                  value: 123
+                });
+              }
+              break;
+            case "?":
+              if (last.length === 0) {
+                repeatErr(i2);
+              }
+              last.push({
+                type: types.REPETITION,
+                min: 0,
+                max: 1,
+                value: last.pop()
+              });
+              break;
+            case "+":
+              if (last.length === 0) {
+                repeatErr(i2);
+              }
+              last.push({
+                type: types.REPETITION,
+                min: 1,
+                max: Infinity,
+                value: last.pop()
+              });
+              break;
+            case "*":
+              if (last.length === 0) {
+                repeatErr(i2);
+              }
+              last.push({
+                type: types.REPETITION,
+                min: 0,
+                max: Infinity,
+                value: last.pop()
+              });
+              break;
+            // Default is a character that is not `\[](){}?+*^$`.
+            default:
+              last.push({
+                type: types.CHAR,
+                value: c2.charCodeAt(0)
+              });
+          }
+        }
+        if (groupStack.length !== 0) {
+          util.error(regexpStr, "Unterminated group");
+        }
+        return start;
+      };
+      module.exports.types = types;
+    }
+  });
+
+  // node_modules/drange/lib/index.js
+  var require_lib2 = __commonJS({
+    "node_modules/drange/lib/index.js"(exports, module) {
+      "use strict";
+      var SubRange = class _SubRange {
+        constructor(low, high) {
+          this.low = low;
+          this.high = high;
+          this.length = 1 + high - low;
+        }
+        overlaps(range) {
+          return !(this.high < range.low || this.low > range.high);
+        }
+        touches(range) {
+          return !(this.high + 1 < range.low || this.low - 1 > range.high);
+        }
+        // Returns inclusive combination of SubRanges as a SubRange.
+        add(range) {
+          return new _SubRange(
+            Math.min(this.low, range.low),
+            Math.max(this.high, range.high)
+          );
+        }
+        // Returns subtraction of SubRanges as an array of SubRanges.
+        // (There's a case where subtraction divides it in 2)
+        subtract(range) {
+          if (range.low <= this.low && range.high >= this.high) {
+            return [];
+          } else if (range.low > this.low && range.high < this.high) {
+            return [
+              new _SubRange(this.low, range.low - 1),
+              new _SubRange(range.high + 1, this.high)
+            ];
+          } else if (range.low <= this.low) {
+            return [new _SubRange(range.high + 1, this.high)];
+          } else {
+            return [new _SubRange(this.low, range.low - 1)];
+          }
+        }
+        toString() {
+          return this.low == this.high ? this.low.toString() : this.low + "-" + this.high;
+        }
+      };
+      var DRange = class _DRange {
+        constructor(a2, b2) {
+          this.ranges = [];
+          this.length = 0;
+          if (a2 != null) this.add(a2, b2);
+        }
+        _update_length() {
+          this.length = this.ranges.reduce((previous, range) => {
+            return previous + range.length;
+          }, 0);
+        }
+        add(a2, b2) {
+          var _add = (subrange) => {
+            var i2 = 0;
+            while (i2 < this.ranges.length && !subrange.touches(this.ranges[i2])) {
+              i2++;
+            }
+            var newRanges = this.ranges.slice(0, i2);
+            while (i2 < this.ranges.length && subrange.touches(this.ranges[i2])) {
+              subrange = subrange.add(this.ranges[i2]);
+              i2++;
+            }
+            newRanges.push(subrange);
+            this.ranges = newRanges.concat(this.ranges.slice(i2));
+            this._update_length();
+          };
+          if (a2 instanceof _DRange) {
+            a2.ranges.forEach(_add);
+          } else {
+            if (b2 == null) b2 = a2;
+            _add(new SubRange(a2, b2));
+          }
+          return this;
+        }
+        subtract(a2, b2) {
+          var _subtract = (subrange) => {
+            var i2 = 0;
+            while (i2 < this.ranges.length && !subrange.overlaps(this.ranges[i2])) {
+              i2++;
+            }
+            var newRanges = this.ranges.slice(0, i2);
+            while (i2 < this.ranges.length && subrange.overlaps(this.ranges[i2])) {
+              newRanges = newRanges.concat(this.ranges[i2].subtract(subrange));
+              i2++;
+            }
+            this.ranges = newRanges.concat(this.ranges.slice(i2));
+            this._update_length();
+          };
+          if (a2 instanceof _DRange) {
+            a2.ranges.forEach(_subtract);
+          } else {
+            if (b2 == null) b2 = a2;
+            _subtract(new SubRange(a2, b2));
+          }
+          return this;
+        }
+        intersect(a2, b2) {
+          var newRanges = [];
+          var _intersect = (subrange) => {
+            var i2 = 0;
+            while (i2 < this.ranges.length && !subrange.overlaps(this.ranges[i2])) {
+              i2++;
+            }
+            while (i2 < this.ranges.length && subrange.overlaps(this.ranges[i2])) {
+              var low = Math.max(this.ranges[i2].low, subrange.low);
+              var high = Math.min(this.ranges[i2].high, subrange.high);
+              newRanges.push(new SubRange(low, high));
+              i2++;
+            }
+          };
+          if (a2 instanceof _DRange) {
+            a2.ranges.forEach(_intersect);
+          } else {
+            if (b2 == null) b2 = a2;
+            _intersect(new SubRange(a2, b2));
+          }
+          this.ranges = newRanges;
+          this._update_length();
+          return this;
+        }
+        index(index) {
+          var i2 = 0;
+          while (i2 < this.ranges.length && this.ranges[i2].length <= index) {
+            index -= this.ranges[i2].length;
+            i2++;
+          }
+          return this.ranges[i2].low + index;
+        }
+        toString() {
+          return "[ " + this.ranges.join(", ") + " ]";
+        }
+        clone() {
+          return new _DRange(this);
+        }
+        numbers() {
+          return this.ranges.reduce((result, subrange) => {
+            var i2 = subrange.low;
+            while (i2 <= subrange.high) {
+              result.push(i2);
+              i2++;
+            }
+            return result;
+          }, []);
+        }
+        subranges() {
+          return this.ranges.map((subrange) => ({
+            low: subrange.low,
+            high: subrange.high,
+            length: 1 + subrange.high - subrange.low
+          }));
+        }
+      };
+      module.exports = DRange;
+    }
+  });
+
+  // node_modules/randexp/lib/randexp.js
+  var require_randexp = __commonJS({
+    "node_modules/randexp/lib/randexp.js"(exports, module) {
+      var ret = require_lib();
+      var DRange = require_lib2();
+      var types = ret.types;
+      module.exports = class RandExp2 {
+        /**
+         * @constructor
+         * @param {RegExp|String} regexp
+         * @param {String} m
+         */
+        constructor(regexp, m2) {
+          this._setDefaults(regexp);
+          if (regexp instanceof RegExp) {
+            this.ignoreCase = regexp.ignoreCase;
+            this.multiline = regexp.multiline;
+            regexp = regexp.source;
+          } else if (typeof regexp === "string") {
+            this.ignoreCase = m2 && m2.indexOf("i") !== -1;
+            this.multiline = m2 && m2.indexOf("m") !== -1;
+          } else {
+            throw new Error("Expected a regexp or string");
+          }
+          this.tokens = ret(regexp);
+        }
+        /**
+         * Checks if some custom properties have been set for this regexp.
+         *
+         * @param {RandExp} randexp
+         * @param {RegExp} regexp
+         */
+        _setDefaults(regexp) {
+          this.max = regexp.max != null ? regexp.max : RandExp2.prototype.max != null ? RandExp2.prototype.max : 100;
+          this.defaultRange = regexp.defaultRange ? regexp.defaultRange : this.defaultRange.clone();
+          if (regexp.randInt) {
+            this.randInt = regexp.randInt;
+          }
+        }
+        /**
+         * Generates the random string.
+         *
+         * @return {String}
+         */
+        gen() {
+          return this._gen(this.tokens, []);
+        }
+        /**
+         * Generate random string modeled after given tokens.
+         *
+         * @param {Object} token
+         * @param {Array.<String>} groups
+         * @return {String}
+         */
+        _gen(token, groups) {
+          var stack, str, n2, i2, l3;
+          switch (token.type) {
+            case types.ROOT:
+            case types.GROUP:
+              if (token.followedBy || token.notFollowedBy) {
+                return "";
+              }
+              if (token.remember && token.groupNumber === void 0) {
+                token.groupNumber = groups.push(null) - 1;
+              }
+              stack = token.options ? this._randSelect(token.options) : token.stack;
+              str = "";
+              for (i2 = 0, l3 = stack.length; i2 < l3; i2++) {
+                str += this._gen(stack[i2], groups);
+              }
+              if (token.remember) {
+                groups[token.groupNumber] = str;
+              }
+              return str;
+            case types.POSITION:
+              return "";
+            case types.SET:
+              var expandedSet = this._expand(token);
+              if (!expandedSet.length) {
+                return "";
+              }
+              return String.fromCharCode(this._randSelect(expandedSet));
+            case types.REPETITION:
+              n2 = this.randInt(
+                token.min,
+                token.max === Infinity ? token.min + this.max : token.max
+              );
+              str = "";
+              for (i2 = 0; i2 < n2; i2++) {
+                str += this._gen(token.value, groups);
+              }
+              return str;
+            case types.REFERENCE:
+              return groups[token.value - 1] || "";
+            case types.CHAR:
+              var code = this.ignoreCase && this._randBool() ? this._toOtherCase(token.value) : token.value;
+              return String.fromCharCode(code);
+          }
+        }
+        /**
+         * If code is alphabetic, converts to other case.
+         * If not alphabetic, returns back code.
+         *
+         * @param {Number} code
+         * @return {Number}
+         */
+        _toOtherCase(code) {
+          return code + (97 <= code && code <= 122 ? -32 : 65 <= code && code <= 90 ? 32 : 0);
+        }
+        /**
+         * Randomly returns a true or false value.
+         *
+         * @return {Boolean}
+         */
+        _randBool() {
+          return !this.randInt(0, 1);
+        }
+        /**
+         * Randomly selects and returns a value from the array.
+         *
+         * @param {Array.<Object>} arr
+         * @return {Object}
+         */
+        _randSelect(arr) {
+          if (arr instanceof DRange) {
+            return arr.index(this.randInt(0, arr.length - 1));
+          }
+          return arr[this.randInt(0, arr.length - 1)];
+        }
+        /**
+         * expands a token to a DiscontinuousRange of characters which has a
+         * length and an index function (for random selecting)
+         *
+         * @param {Object} token
+         * @return {DiscontinuousRange}
+         */
+        _expand(token) {
+          if (token.type === ret.types.CHAR) {
+            return new DRange(token.value);
+          } else if (token.type === ret.types.RANGE) {
+            return new DRange(token.from, token.to);
+          } else {
+            let drange = new DRange();
+            for (let i2 = 0; i2 < token.set.length; i2++) {
+              let subrange = this._expand(token.set[i2]);
+              drange.add(subrange);
+              if (this.ignoreCase) {
+                for (let j3 = 0; j3 < subrange.length; j3++) {
+                  let code = subrange.index(j3);
+                  let otherCaseCode = this._toOtherCase(code);
+                  if (code !== otherCaseCode) {
+                    drange.add(otherCaseCode);
+                  }
+                }
+              }
+            }
+            if (token.not) {
+              return this.defaultRange.clone().subtract(drange);
+            } else {
+              return this.defaultRange.clone().intersect(drange);
+            }
+          }
+        }
+        /**
+         * Randomly generates and returns a number between a and b (inclusive).
+         *
+         * @param {Number} a
+         * @param {Number} b
+         * @return {Number}
+         */
+        randInt(a2, b2) {
+          return a2 + Math.floor(Math.random() * (1 + b2 - a2));
+        }
+        /**
+         * Default range of characters to generate from.
+         */
+        get defaultRange() {
+          return this._range = this._range || new DRange(32, 126);
+        }
+        set defaultRange(range) {
+          this._range = range;
+        }
+        /**
+         *
+         * Enables use of randexp with a shorter call.
+         *
+         * @param {RegExp|String| regexp}
+         * @param {String} m
+         * @return {String}
+         */
+        static randexp(regexp, m2) {
+          var randexp;
+          if (typeof regexp === "string") {
+            regexp = new RegExp(regexp, m2);
+          }
+          if (regexp._randexp === void 0) {
+            randexp = new RandExp2(regexp, m2);
+            regexp._randexp = randexp;
+          } else {
+            randexp = regexp._randexp;
+            randexp._setDefaults(regexp);
+          }
+          return randexp.gen();
+        }
+        /**
+         * Enables sugary /regexp/.gen syntax.
+         */
+        static sugar() {
+          RegExp.prototype.gen = function() {
+            return RandExp2.randexp(this);
+          };
+        }
+      };
+    }
+  });
 
   // node_modules/@faker-js/faker/dist/chunk-ZES2MVAN.js
   var e = [{ name: "Aegean Airlines", iataCode: "A3" }, { name: "Aeroflot", iataCode: "SU" }, { name: "Aerolineas Argentinas", iataCode: "AR" }, { name: "Aeromexico", iataCode: "AM" }, { name: "Air Algerie", iataCode: "AH" }, { name: "Air Arabia", iataCode: "G9" }, { name: "Air Canada", iataCode: "AC" }, { name: "Air China", iataCode: "CA" }, { name: "Air Europa", iataCode: "UX" }, { name: "Air France", iataCode: "AF" }, { name: "Air India", iataCode: "AI" }, { name: "Air Mauritius", iataCode: "MK" }, { name: "Air New Zealand", iataCode: "NZ" }, { name: "Air Niugini", iataCode: "PX" }, { name: "Air Tahiti", iataCode: "VT" }, { name: "Air Tahiti Nui", iataCode: "TN" }, { name: "Air Transat", iataCode: "TS" }, { name: "AirAsia X", iataCode: "D7" }, { name: "AirAsia", iataCode: "AK" }, { name: "Aircalin", iataCode: "SB" }, { name: "Alaska Airlines", iataCode: "AS" }, { name: "Alitalia", iataCode: "AZ" }, { name: "All Nippon Airways", iataCode: "NH" }, { name: "Allegiant Air", iataCode: "G4" }, { name: "American Airlines", iataCode: "AA" }, { name: "Asiana Airlines", iataCode: "OZ" }, { name: "Avianca", iataCode: "AV" }, { name: "Azul Linhas Aereas Brasileiras", iataCode: "AD" }, { name: "Azur Air", iataCode: "ZF" }, { name: "Beijing Capital Airlines", iataCode: "JD" }, { name: "Boliviana de Aviacion", iataCode: "OB" }, { name: "British Airways", iataCode: "BA" }, { name: "Cathay Pacific", iataCode: "CX" }, { name: "Cebu Pacific Air", iataCode: "5J" }, { name: "China Airlines", iataCode: "CI" }, { name: "China Eastern Airlines", iataCode: "MU" }, { name: "China Southern Airlines", iataCode: "CZ" }, { name: "Condor", iataCode: "DE" }, { name: "Copa Airlines", iataCode: "CM" }, { name: "Delta Air Lines", iataCode: "DL" }, { name: "Easyfly", iataCode: "VE" }, { name: "EasyJet", iataCode: "U2" }, { name: "EcoJet", iataCode: "8J" }, { name: "Egyptair", iataCode: "MS" }, { name: "El Al", iataCode: "LY" }, { name: "Emirates Airlines", iataCode: "EK" }, { name: "Ethiopian Airlines", iataCode: "ET" }, { name: "Etihad Airways", iataCode: "EY" }, { name: "EVA Air", iataCode: "BR" }, { name: "Fiji Airways", iataCode: "FJ" }, { name: "Finnair", iataCode: "AY" }, { name: "Flybondi", iataCode: "FO" }, { name: "Flydubai", iataCode: "FZ" }, { name: "FlySafair", iataCode: "FA" }, { name: "Frontier Airlines", iataCode: "F9" }, { name: "Garuda Indonesia", iataCode: "GA" }, { name: "Go First", iataCode: "G8" }, { name: "Gol Linhas Aereas Inteligentes", iataCode: "G3" }, { name: "Hainan Airlines", iataCode: "HU" }, { name: "Hawaiian Airlines", iataCode: "HA" }, { name: "IndiGo Airlines", iataCode: "6E" }, { name: "Japan Airlines", iataCode: "JL" }, { name: "Jeju Air", iataCode: "7C" }, { name: "Jet2", iataCode: "LS" }, { name: "JetBlue Airways", iataCode: "B6" }, { name: "JetSMART", iataCode: "JA" }, { name: "Juneyao Airlines", iataCode: "HO" }, { name: "Kenya Airways", iataCode: "KQ" }, { name: "KLM Royal Dutch Airlines", iataCode: "KL" }, { name: "Korean Air", iataCode: "KE" }, { name: "Kulula.com", iataCode: "MN" }, { name: "LATAM Airlines", iataCode: "LA" }, { name: "Lion Air", iataCode: "JT" }, { name: "LOT Polish Airlines", iataCode: "LO" }, { name: "Lufthansa", iataCode: "LH" }, { name: "Libyan Airlines", iataCode: "LN" }, { name: "Linea Aerea Amaszonas", iataCode: "Z8" }, { name: "Malaysia Airlines", iataCode: "MH" }, { name: "Nordwind Airlines", iataCode: "N4" }, { name: "Norwegian Air Shuttle", iataCode: "DY" }, { name: "Oman Air", iataCode: "WY" }, { name: "Pakistan International Airlines", iataCode: "PK" }, { name: "Pegasus Airlines", iataCode: "PC" }, { name: "Philippine Airlines", iataCode: "PR" }, { name: "Qantas Group", iataCode: "QF" }, { name: "Qatar Airways", iataCode: "QR" }, { name: "Republic Airways", iataCode: "YX" }, { name: "Royal Air Maroc", iataCode: "AT" }, { name: "Ryanair", iataCode: "FR" }, { name: "S7 Airlines", iataCode: "S7" }, { name: "SAS", iataCode: "SK" }, { name: "Satena", iataCode: "9R" }, { name: "Saudia", iataCode: "SV" }, { name: "Shandong Airlines", iataCode: "SC" }, { name: "Sichuan Airlines", iataCode: "3U" }, { name: "Singapore Airlines", iataCode: "SQ" }, { name: "Sky Airline", iataCode: "H2" }, { name: "SkyWest Airlines", iataCode: "OO" }, { name: "South African Airways", iataCode: "SA" }, { name: "Southwest Airlines", iataCode: "WN" }, { name: "SpiceJet", iataCode: "SG" }, { name: "Spirit Airlines", iataCode: "NK" }, { name: "Spring Airlines", iataCode: "9C" }, { name: "SriLankan Airlines", iataCode: "UL" }, { name: "Star Peru", iataCode: "2I" }, { name: "Sun Country Airlines", iataCode: "SY" }, { name: "SunExpress", iataCode: "XQ" }, { name: "TAP Air Portugal", iataCode: "TP" }, { name: "Thai AirAsia", iataCode: "FD" }, { name: "Thai Airways", iataCode: "TG" }, { name: "TUI Airways", iataCode: "BY" }, { name: "Tunisair", iataCode: "TU" }, { name: "Turkish Airlines", iataCode: "TK" }, { name: "Ukraine International", iataCode: "PS" }, { name: "United Airlines", iataCode: "UA" }, { name: "Ural Airlines", iataCode: "U6" }, { name: "VietJet Air", iataCode: "VJ" }, { name: "Vietnam Airlines", iataCode: "VN" }, { name: "Virgin Atlantic Airways", iataCode: "VS" }, { name: "Virgin Australia", iataCode: "VA" }, { name: "VivaAerobus", iataCode: "VB" }, { name: "VOEPASS Linhas Aereas", iataCode: "2Z" }, { name: "Volaris", iataCode: "Y4" }, { name: "WestJet", iataCode: "WS" }, { name: "Wingo", iataCode: "P5" }, { name: "Wizz Air", iataCode: "W6" }];
@@ -2029,6 +2770,7 @@
   var f2 = new Qe2({ locale: [ys, Oi] });
 
   // extensions/faker-form/src/content.js
+  var import_randexp = __toESM(require_randexp(), 1);
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "fillForms") {
       const forms = getVisibleForms();
@@ -2047,7 +2789,8 @@
     const allForms = document.querySelectorAll("form");
     const visibleForms = [];
     allForms.forEach((form) => {
-      if (isElementInViewport(form)) {
+      const visible = form.checkVisibility({ opacityProperty: true, visibilityProperty: true });
+      if (isElementInViewport(form) && visible) {
         visibleForms.push(form);
       }
     });
@@ -2064,6 +2807,7 @@
       return 0;
     }
     let filledCount = 0;
+    const formPassword = generateMemorablePassword(f2);
     const inputs = form.querySelectorAll('input:not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="file"]):not([readonly]):not([type="token"])');
     const textareas = form.querySelectorAll("textarea:not([readonly])");
     const selects = form.querySelectorAll("select:not([disabled])");
@@ -2081,7 +2825,8 @@
             break;
           case "tel":
           case "phone":
-            input.value = fakerInstance.phone.number();
+            const phone = fakerInstance.phone.number({ style: "international" });
+            input.value = phone.replace(/\+/g, "").replace(/\s+/g, "");
             break;
           case "number":
             input.value = fakerInstance.number.int({ min: 1, max: 1e3 });
@@ -2094,10 +2839,11 @@
             input.value = fakerInstance.internet.url();
             break;
           case "password":
-            input.value = fakerInstance.internet.password({ length: 12, memorable: false });
+            input.value = formPassword;
+            input.type = "text";
             break;
           default:
-            input.value = getFakeValue(name, id, fakerInstance);
+            input.value = getFakeValueWithAttributes(name, id, fakerInstance, input);
         }
         input.dispatchEvent(new Event("input", { bubbles: true }));
         input.dispatchEvent(new Event("change", { bubbles: true }));
@@ -2162,44 +2908,120 @@
     console.log(`Faker Form: Filled ${filledCount} form elements in form`);
     return filledCount;
   }
-  function getFakeValue(name, id, faker) {
+  function getFakeValueWithAttributes(name, id, faker, element) {
     const nameAttr = (name + id).toLowerCase();
+    const pattern = element?.getAttribute("pattern");
+    const maxLength = element?.getAttribute("maxlength");
+    const minLength = element?.getAttribute("minlength");
+    let fakeValue = "";
     if (/first.?name|fname|given.?name/.test(nameAttr)) {
-      return faker.person.firstName();
+      fakeValue = faker.person.firstName();
+    } else if (/last.?name|lname|family.?name|surname/.test(nameAttr)) {
+      fakeValue = faker.person.lastName();
+    } else if (/^name$|fullname|full.?name|username/.test(nameAttr)) {
+      fakeValue = faker.person.fullName();
+    } else if (/email|e.?mail|mail/.test(nameAttr)) {
+      fakeValue = faker.internet.email();
+    } else if (/phone|tel|telephone|mobile|cell/.test(nameAttr)) {
+      fakeValue = faker.phone.number();
+    } else if (/address|street|location|addr/.test(nameAttr)) {
+      fakeValue = faker.location.streetAddress();
+    } else if (/city|town/.test(nameAttr)) {
+      fakeValue = faker.location.city();
+    } else if (/state|province|region/.test(nameAttr)) {
+      fakeValue = faker.location.state({ abbreviated: true });
+    } else if (/zip|postal|pincode|postcode/.test(nameAttr)) {
+      fakeValue = faker.location.zipCode();
+    } else if (/country|nation/.test(nameAttr)) {
+      fakeValue = faker.location.country();
+    } else if (/company|organization|org|business/.test(nameAttr)) {
+      fakeValue = faker.company.name();
+    } else if (/website|url|homepage|web/.test(nameAttr)) {
+      fakeValue = faker.internet.url();
+    } else {
+      fakeValue = faker.lorem.word();
     }
-    if (/last.?name|lname|family.?name|surname/.test(nameAttr)) {
-      return faker.person.lastName();
+    if (!pattern && (maxLength || minLength)) {
+      fakeValue = constrainStringLength(fakeValue, maxLength, minLength, faker);
     }
-    if (/^name$|fullname|full.?name|username/.test(nameAttr)) {
-      return faker.person.fullName();
+    if (pattern && !matchPattern(fakeValue, pattern)) {
+      fakeValue = generateValueFromPattern(pattern, faker, maxLength, minLength);
     }
-    if (/email|e.?mail|mail/.test(nameAttr)) {
-      return faker.internet.email();
+    return fakeValue;
+  }
+  function matchPattern(value, pattern) {
+    try {
+      const regex = new RegExp(pattern);
+      return regex.test(value);
+    } catch (error) {
+      console.warn(`Invalid pattern: ${pattern}`, error);
+      return false;
     }
-    if (/phone|tel|telephone|mobile|cell/.test(nameAttr)) {
-      return faker.phone.number();
+  }
+  function constrainStringLength(value, maxLength, minLength, faker) {
+    const max = maxLength ? parseInt(maxLength, 10) : null;
+    const min = minLength ? parseInt(minLength, 10) : null;
+    if ((max === null || value.length <= max) && (min === null || value.length >= min)) {
+      return value;
     }
-    if (/address|street|location|addr/.test(nameAttr)) {
-      return faker.location.streetAddress();
+    if (max !== null && value.length > max) {
+      return value.substring(0, max);
     }
-    if (/city|town/.test(nameAttr)) {
-      return faker.location.city();
+    if (min !== null && value.length < min) {
+      let padded = value;
+      const padLength = min - value.length;
+      const padding = faker.string.alphanumeric(padLength);
+      padded = value + padding;
+      return padded.substring(0, max || padded.length);
     }
-    if (/state|province|region/.test(nameAttr)) {
-      return faker.location.state({ abbreviated: true });
+    return value;
+  }
+  function generateValueFromPattern(pattern, faker, maxLength, minLength) {
+    const max = maxLength ? parseInt(maxLength, 10) : null;
+    const min = minLength ? parseInt(minLength, 10) : null;
+    try {
+      const regex = new RegExp(pattern);
+      const gen = new import_randexp.default(regex).gen();
+      const subIdx = min || max || null;
+      if (subIdx !== null) return gen.substring(0, subIdx);
+      return gen;
+    } catch (error) {
+      console.warn(`Invalid pattern: ${pattern}`, error);
+      const length = min || max || 8;
+      return faker.string.alphanumeric(length);
     }
-    if (/zip|postal|pincode|postcode/.test(nameAttr)) {
-      return faker.location.zipCode();
-    }
-    if (/country|nation/.test(nameAttr)) {
-      return faker.location.country();
-    }
-    if (/company|organization|org|business/.test(nameAttr)) {
-      return faker.company.name();
-    }
-    if (/website|url|homepage|web/.test(nameAttr)) {
-      return faker.internet.url();
-    }
-    return faker.lorem.word();
+  }
+  function generateMemorablePassword(faker) {
+    const words = [
+      "Alpha",
+      "Bravo",
+      "Charlie",
+      "Delta",
+      "Echo",
+      "Foxtrot",
+      "Golf",
+      "Hotel",
+      "India",
+      "Juliet",
+      "Kilo",
+      "Lima",
+      "Mike",
+      "November",
+      "Oscar",
+      "Papa",
+      "Quebec",
+      "Romeo",
+      "Sierra",
+      "Tango",
+      "Uniform",
+      "Victor",
+      "Whiskey",
+      "Xray",
+      "Yankee",
+      "Zulu"
+    ];
+    const word = words[Math.floor(Math.random() * words.length)];
+    const number = faker.number.int({ min: 100, max: 999 });
+    return `${word}@${number}`;
   }
 })();
