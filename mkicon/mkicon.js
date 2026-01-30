@@ -1,11 +1,7 @@
 import path from "path";
-import { fileURLToPath } from "url";
 import sharp from "sharp";
 import { program } from "commander";
 import { promises as fs } from "fs";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 /**
  * Parse dimension string into array of dimension objects
@@ -126,7 +122,7 @@ const processImages = async (imagePath, outputDir, fileNamePattern, dimensions) 
     });
 
     await Promise.all(resizePromises);
-    console.log(`\n✓ All images processed successfully!`);
+    console.log("\n✓ All images processed successfully!");
   } catch (error) {
     console.error("✗ Fatal error:", error.message);
     process.exit(1);
@@ -177,7 +173,7 @@ program
       if (error.code === "ENOENT") {
         console.error(`✗ Image file not found: ${imagePath}`);
       } else {
-        console.error(`✗ Error:`, error.message);
+        console.error("✗ Error:", error.message);
       }
       process.exit(1);
     }

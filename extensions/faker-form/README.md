@@ -75,7 +75,6 @@ extensions/faker-form/
 └── src/
     ├── background.js          # Background service worker
     ├── content.js             # Content script (injected into pages)
-    ├── faker.js               # Faker utility functions & detection logic
     ├── popup.html             # Popup UI
     ├── popup.js               # Popup logic
     └── popup.css              # Popup styling

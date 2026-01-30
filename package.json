@@ -7,8 +7,8 @@
   "scripts": {
     "lint": "eslint ./**/*.js",
     "lint:fix": "eslint ./**/*.js --fix",
-    "es:build:fakerform": "node extensions/faker-form/build-extension.js",
-    "es:build": "npx esbuild makecv/editor.js --bundle --outfile=makecv/dist/editor.js && npx esbuild --bundle makecv/editor.css --outfile=makecv/dist/editor.css"
+    "build:fakerform": "bash ./extensions/faker-form/build.sh",
+    "es:build": "esbuild makecv/editor.js --bundle --outfile=makecv/dist/editor.js && npx esbuild --bundle makecv/editor.css --outfile=makecv/dist/editor.css"
   },
   "repository": {
     "type": "git",
@@ -36,9 +36,13 @@
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
+    "@babel/cli": "^7.28.6",
+    "@babel/core": "^7.28.6",
+    "@babel/preset-env": "^7.28.6",
     "@eslint/compat": "^2.0.1",
-    "esbuild": "0.27.2",
+    "esbuild": "^0.27.2",
     "eslint": "^9.39.2",
-    "globals": "^17.2.0"
+    "globals": "^17.2.0",
+    "terser": "^5.46.0"
   }
 }

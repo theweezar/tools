@@ -1,8 +1,8 @@
-import Quill from 'quill';
-import Handlebars from 'handlebars';
+import Quill from "quill";
+import Handlebars from "handlebars";
 
-const quill = new Quill('#editor', {
-  theme: 'snow'
+const quill = new Quill("#editor", {
+  theme: "snow"
 });
 const LOCAL_KEY = "quill_ct";
 
@@ -30,7 +30,7 @@ function save() {
   try {
     const quillContent = JSON.stringify(quill.getContents());
     localStorage.setItem(LOCAL_KEY, quillContent);
-    console.log('saved to storage.');
+    console.log("saved to storage.");
   } catch (error) {
     console.error(error.message);
   }
@@ -41,10 +41,10 @@ function parseAndInsertHtml() {
   const role = document.getElementById("role");
   const content = document.getElementById("content");
   const data = {
-    company: company.value || '{{company}}',
-    role: role.value || '{{role}}',
+    company: company.value || "{{company}}",
+    role: role.value || "{{role}}",
   };
-  const source = quill.getSemanticHTML().replace(/&nbsp;/g, ' ');
+  const source = quill.getSemanticHTML().replace(/&nbsp;/g, " ");
   const template = Handlebars.compile(source);
   const result = template(data);
   content.innerHTML = result;
@@ -55,26 +55,26 @@ function initQuillEvents() {
     if (source === "user") save();
     parseAndInsertHtml();
   });
-  quill.on('text-change', handleQuillTextChange);
-  document.getElementById("company").addEventListener('change', parseAndInsertHtml);
-  document.getElementById("role").addEventListener('change', parseAndInsertHtml);
+  quill.on("text-change", handleQuillTextChange);
+  document.getElementById("company").addEventListener("change", parseAndInsertHtml);
+  document.getElementById("role").addEventListener("change", parseAndInsertHtml);
 }
 
 function copyToClipboard() {
-  const notification = document.getElementById('notification');
+  const notification = document.getElementById("notification");
   const content = document.getElementById("content");
   const text = content.innerText;
   navigator.clipboard.writeText(text).then(() => {
-    notification.style.display = 'block';
+    notification.style.display = "block";
     setTimeout(() => {
-      notification.style.display = 'none';
+      notification.style.display = "none";
     }, 1500);
   }).catch(err => {
-    console.error('Failed to copy:', err);
-    alert('Failed to copy to clipboard');
+    console.error("Failed to copy:", err);
+    alert("Failed to copy to clipboard");
   });
 }
 
 initQuillEvents();
 load();
-document.getElementById('copyBtn').addEventListener('click', copyToClipboard);
+document.getElementById("copyBtn").addEventListener("click", copyToClipboard);

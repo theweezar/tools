@@ -2,19 +2,19 @@
  * Content script that injects faker library and handles form filling
  */
 
-import { faker } from '@faker-js/faker';
-import RandExp from 'randexp';
+import { faker } from "@faker-js/faker";
+import RandExp from "randexp";
 
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'fillForms') {
+  if (request.action === "fillForms") {
     const forms = getVisibleForms();
     let totalFilled = 0;
     forms.forEach((form) => {
       totalFilled += fillForm(form);
     });
     sendResponse({
-      status: 'success',
+      status: "success",
       message: `Forms filled with faker data (${totalFilled} elements)`,
       elementsFilled: totalFilled
     });
@@ -26,7 +26,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
  * @returns {HTMLFormElement[]} Array of visible form elements
  */
 function getVisibleForms() {
-  const allForms = document.querySelectorAll('form');
+  const allForms = document.querySelectorAll("form");
   const visibleForms = [];
 
   allForms.forEach((form) => {
@@ -62,7 +62,7 @@ function isElementInViewport(element) {
 function fillForm(form) {
   const fakerInstance = faker;
   if (!fakerInstance) {
-    console.error('Faker instance not available');
+    console.error("Faker instance not available");
     return 0;
   }
 
@@ -72,54 +72,54 @@ function fillForm(form) {
   const formPassword = generateMemorablePassword(faker);
 
   // Get form elements only within this specific form
-  const inputs = form.querySelectorAll('input:not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="file"]):not([readonly]):not([type="token"])');
-  const textareas = form.querySelectorAll('textarea:not([readonly])');
-  const selects = form.querySelectorAll('select:not([disabled])');
-  const checkboxes = form.querySelectorAll('input[type="checkbox"]:not([readonly])');
-  const radios = form.querySelectorAll('input[type="radio"]:not([readonly])');
+  const inputs = form.querySelectorAll("input:not([type=\"hidden\"]):not([type=\"button\"]):not([type=\"submit\"]):not([type=\"reset\"]):not([type=\"file\"]):not([readonly]):not([type=\"token\"])");
+  const textareas = form.querySelectorAll("textarea:not([readonly])");
+  const selects = form.querySelectorAll("select:not([disabled])");
+  const checkboxes = form.querySelectorAll("input[type=\"checkbox\"]:not([readonly])");
+  const radios = form.querySelectorAll("input[type=\"radio\"]:not([readonly])");
 
   // Fill input[type="text"], input[type="email"], etc.
   inputs.forEach((input) => {
     if (input.offsetParent === null) return; // Skip hidden elements
 
-    const type = input.type || 'text';
-    const name = input.name || '';
-    const id = input.id || '';
+    const type = input.type || "text";
+    const name = input.name || "";
+    const id = input.id || "";
 
     try {
       switch (type) {
-        case 'email':
+        case "email":
           input.value = fakerInstance.internet.email();
           break;
-        case 'tel':
-        case 'phone':
-          const phone = fakerInstance.phone.number({ style: 'international' });
-          input.value = phone.replace(/\+/g, '').replace(/\s+/g, '');
+        case "tel":
+        case "phone":
+          const phone = fakerInstance.phone.number({ style: "international" });
+          input.value = phone.replace(/\+/g, "").replace(/\s+/g, "");
           break;
-        case 'number':
+        case "number":
           input.value = fakerInstance.number.int({ min: 1, max: 1000 });
           break;
-        case 'date':
-          input.value = fakerInstance.date.birthdate({ min: 18, max: 80, mode: 'age' }).toISOString().split('T')[0];
+        case "date":
+          input.value = fakerInstance.date.birthdate({ min: 18, max: 80, mode: "age" }).toISOString().split("T")[0];
           break;
-        case 'url':
-        case 'website':
+        case "url":
+        case "website":
           input.value = fakerInstance.internet.url();
           break;
-        case 'password':
+        case "password":
           input.value = formPassword;
-          input.type = 'text';
+          input.type = "text";
           break;
         default: // text and others
           input.value = getFakeValueWithAttributes(name, id, fakerInstance, input);
       }
 
       // Trigger input event for frameworks that listen to changes
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-      input.dispatchEvent(new Event('change', { bubbles: true }));
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
       filledCount++;
     } catch (error) {
-      console.error('Error filling input:', error);
+      console.error("Error filling input:", error);
     }
   });
 
@@ -129,11 +129,11 @@ function fillForm(form) {
 
     try {
       textarea.value = fakerInstance.lorem.paragraph();
-      textarea.dispatchEvent(new Event('input', { bubbles: true }));
-      textarea.dispatchEvent(new Event('change', { bubbles: true }));
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+      textarea.dispatchEvent(new Event("change", { bubbles: true }));
       filledCount++;
     } catch (error) {
-      console.error('Error filling textarea:', error);
+      console.error("Error filling textarea:", error);
     }
   });
 
@@ -142,15 +142,15 @@ function fillForm(form) {
     if (select.offsetParent === null) return;
 
     try {
-      const options = Array.from(select.options).filter(opt => opt.value && opt.value !== '');
+      const options = Array.from(select.options).filter(opt => opt.value && opt.value !== "");
       if (options.length > 0) {
         const randomOption = options[Math.floor(Math.random() * options.length)];
         select.value = randomOption.value;
-        select.dispatchEvent(new Event('change', { bubbles: true }));
+        select.dispatchEvent(new Event("change", { bubbles: true }));
         filledCount++;
       }
     } catch (error) {
-      console.error('Error filling select:', error);
+      console.error("Error filling select:", error);
     }
   });
 
@@ -160,10 +160,10 @@ function fillForm(form) {
 
     try {
       checkbox.checked = Math.random() > 0.5;
-      checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+      checkbox.dispatchEvent(new Event("change", { bubbles: true }));
       filledCount++;
     } catch (error) {
-      console.error('Error filling checkbox:', error);
+      console.error("Error filling checkbox:", error);
     }
   });
 
@@ -181,10 +181,10 @@ function fillForm(form) {
     try {
       const randomRadio = group[Math.floor(Math.random() * group.length)];
       randomRadio.checked = true;
-      randomRadio.dispatchEvent(new Event('change', { bubbles: true }));
+      randomRadio.dispatchEvent(new Event("change", { bubbles: true }));
       filledCount++;
     } catch (error) {
-      console.error('Error filling radio:', error);
+      console.error("Error filling radio:", error);
     }
   });
 
@@ -202,11 +202,11 @@ function fillForm(form) {
  */
 function getFakeValueWithAttributes(name, id, faker, element) {
   const nameAttr = (name + id).toLowerCase();
-  const pattern = element?.getAttribute('pattern');
-  const maxLength = element?.getAttribute('maxlength');
-  const minLength = element?.getAttribute('minlength');
+  const pattern = element?.getAttribute("pattern");
+  const maxLength = element?.getAttribute("maxlength");
+  const minLength = element?.getAttribute("minlength");
 
-  let fakeValue = '';
+  let fakeValue = "";
 
   if (/first.?name|fname|given.?name/.test(nameAttr)) {
     fakeValue = faker.person.firstName();
@@ -333,10 +333,10 @@ function generateValueFromPattern(pattern, faker, maxLength, minLength) {
  */
 function generateMemorablePassword(faker) {
   const words = [
-    'Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', 'Foxtrot', 'Golf', 'Hotel',
-    'India', 'Juliet', 'Kilo', 'Lima', 'Mike', 'November', 'Oscar', 'Papa',
-    'Quebec', 'Romeo', 'Sierra', 'Tango', 'Uniform', 'Victor', 'Whiskey',
-    'Xray', 'Yankee', 'Zulu'
+    "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel",
+    "India", "Juliet", "Kilo", "Lima", "Mike", "November", "Oscar", "Papa",
+    "Quebec", "Romeo", "Sierra", "Tango", "Uniform", "Victor", "Whiskey",
+    "Xray", "Yankee", "Zulu"
   ];
 
   const word = words[Math.floor(Math.random() * words.length)];
