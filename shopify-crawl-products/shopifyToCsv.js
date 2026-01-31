@@ -1,26 +1,26 @@
 "use strict";
 
-const fs = require("fs");
-const path = require("path");
-const { createArrayCsvWriter } = require("csv-writer");
-const cheerio = require("cheerio");
-const cwd = process.cwd();
-const config = require("./config.json");
-const outputFile = path.join(cwd, config.csv.output || "products.csv");
+import { createArrayCsvWriter } from "csv-writer";
+import { existsSync, readdirSync, readFileSync } from "fs";
+import path from "path";
+import * as cheerio from "cheerio";
+import { Command } from "commander";
+import header from "./header.json" with { type: "json" };
+import config from "./config.json" with { type: "json" };
+import { pathToFileURL } from "url";
 
 /**
  * Lists all .js files in the client/js folder.
- * @param {string} rPath - relative path
+ * @param {string} resolvedPath - resolved path
  * @param {string} ext - file extension matching
  * @returns {Array} 
  */
-function listFiles(rPath, ext) {
-  const folderPath = path.join(cwd, rPath);
+function listFiles(resolvedPath, ext) {
   try {
-    const files = fs.readdirSync(folderPath, { withFileTypes: true });
+    const files = readdirSync(resolvedPath, { withFileTypes: true });
     return files
       .filter(file => file.isFile() && file.name.endsWith(ext))
-      .map(file => path.join(folderPath, file.name));
+      .map(file => path.join(resolvedPath, file.name));
   } catch (error) {
     console.error(`Error reading folder: ${error.message}`);
     throw error;
@@ -35,8 +35,8 @@ function listFiles(rPath, ext) {
 function readHtml(filePath) {
   try {
     const htmlPath = filePath.replace(/\.json$/i, ".html");
-    if (!fs.existsSync(htmlPath)) return "";
-    const html = fs.readFileSync(htmlPath, "utf8");
+    if (!existsSync(htmlPath)) return "";
+    const html = readFileSync(htmlPath, "utf8");
     return html || "";
   } catch (err) {
     return "";
@@ -377,14 +377,13 @@ function collectTags(product) {
   return [genderTag, activityTag, otherTag].filter(Boolean).join(", ");
 }
 
-function processProducts() {
-  const productFiles = listFiles(config.csv.entry, ".json");//.slice(0, 1);
-  const { headers } = require("./header");
+function processProducts(options) {
+  const productFiles = listFiles(options.sourceDir, ".json");//.slice(0, 1);
   const counters = { products: 0, variants: 0 };
-  const mainMap = buildMainMap(headers);
+  const mainMap = buildMainMap(header.headers);
   const csvWriter = createArrayCsvWriter({
     header: mainMap.map(entry => entry.header),
-    path: outputFile
+    path: options.output
   });
   const processRecord = async (record) => {
     await csvWriter.writeRecords([record]);
@@ -392,9 +391,10 @@ function processProducts() {
 
   const processProductFiles = async () => {
     for (let i = 0; i < productFiles.length; i++) {
-      const file = productFiles[i];
-      const product = require(file);
-      const html = readHtml(file);
+      const filePath = productFiles[i];
+      const fileURL = pathToFileURL(filePath);
+      const { default: product } = await import(fileURL, { with: { type: "json" }, });
+      const html = readHtml(filePath);
       const mediaMap = buildMediaMapByID(product);
       const gender = collectGender(product);
       const tags = collectTags(product);
@@ -426,10 +426,32 @@ function processProducts() {
   };
 
   processProductFiles()
-    .then(() => console.log(`\nWrote ${counters.products} products and ${counters.variants} variants to ${outputFile}`))
+    .then(() => console.log(`\nWrote ${counters.products} products and ${counters.variants} variants to ${options.output}`))
     .catch(error => console.error(error));
 }
 
-if (require.main === module) {
-  processProducts();
+if (process.argv[1] === import.meta.filename) {
+  const program = new Command();
+
+  program
+    .name("shopifyToCsv")
+    .description("Convert Shopify product JSON files to CSV")
+    .version("1.0.0")
+    .argument("<sourceDir>", "Source directory containing product .json files")
+    .option("-o, --output <path>", "Output path for the CSV file", "./products.csv")
+    .action((sourceDir, options) => {
+      const resolvedOptions = {
+        sourceDir: path.resolve(sourceDir),
+        output: path.resolve(options.output),
+      };
+
+      if (!existsSync(resolvedOptions.sourceDir)) {
+        console.error(`✗ Source directory does not exist: ${resolvedOptions.sourceDir}`);
+        process.exit(1);
+      }
+
+      processProducts(resolvedOptions);
+    });
+
+  program.parse();
 }

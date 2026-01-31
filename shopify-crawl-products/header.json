@@ -1,8 +1,5 @@
-/**
- * ([^\n]*)\n -> "$1",\n
- */
-module.exports = {
-  headers: [
+{
+  "headers": [
     "Handle",
     "Title",
     "Body (HTML)",
@@ -63,6 +60,6 @@ module.exports = {
     "Variant Weight Unit",
     "Variant Tax Code",
     "Cost per item",
-    "Status",
+    "Status"
   ]
-};
+}

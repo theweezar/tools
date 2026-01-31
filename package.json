@@ -8,7 +8,7 @@
     "lint": "eslint ./**/*.js",
     "lint:fix": "eslint ./**/*.js --fix",
     "build:fakerform": "bash ./extensions/faker-form/build.sh",
-    "es:build": "esbuild makecv/editor.js --bundle --outfile=makecv/dist/editor.js && npx esbuild --bundle makecv/editor.css --outfile=makecv/dist/editor.css"
+    "build:cveditor": "esbuild makecv/editor.js --bundle --outfile=makecv/dist/editor.js && npx esbuild --bundle makecv/editor.css --outfile=makecv/dist/editor.css"
   },
   "repository": {
     "type": "git",

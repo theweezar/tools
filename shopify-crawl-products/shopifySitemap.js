@@ -1,19 +1,11 @@
 "use strict";
 
-const axios = require("axios");
-const xml2js = require("xml2js");
-const fs = require("fs");
-const { promisify } = require("util");
-const path = require("path");
-const cwd = process.cwd();
-const config = require("./config.json");
-const outputfolder = path.join(cwd, config.sitemap.output);
-const isHtmlMode = config.sitemap.mode === "html";
-
-// Ensure output folder exists
-if (!fs.existsSync(outputfolder)) {
-  fs.mkdirSync(outputfolder, { recursive: true });
-}
+import axios from "axios";
+import xml2js from "xml2js";
+import path from "path";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
+import { Command } from "commander";
+import { promisify } from "util";
 
 // Convert xml2js.parseString to promise-based function
 const parseXML = promisify(xml2js.parseString);
@@ -47,24 +39,16 @@ const extractProductUrls = (sitemap) => {
   return urls.map(url => url.loc[0]);
 };
 
-/**
- * Transform product URL to API URL and extract filename
- * @param {string} url - product URL
- * @returns {Object} - contains apiUrl and filename
- */
-const transformProductUrl = (url) => ({
-  apiUrl: isHtmlMode ? url : `${url}.js`,
-  filename: url.split("/").pop()
-});
-
 // Fetch and save product data
-const fetchAndSaveProduct = async ({ apiUrl, filename }) => {
+const fetchAndSaveProduct = async ({ apiUrl, filename }, options) => {
   try {
     const response = await axios.get(apiUrl);
-    const cleanFilename = filename.replace(/\.[^/.]+$/, "");
+    const cleanFilename = filename.replace(/\.[^\/\.]+$/, "");
+    const isHtmlMode = options.mode === "html";
     const ext = isHtmlMode ? ".html" : ".json";
-    const filepath = path.join(outputfolder, `${cleanFilename}${ext}`);
-    fs.writeFileSync(filepath, isHtmlMode ? response.data : JSON.stringify(response.data, null, 2));
+    const text = isHtmlMode ? response.data : JSON.stringify(response.data, null, 2);
+    const filepath = path.join(options.output, `${cleanFilename}${ext}`);
+    writeFileSync(filepath, text);
     console.log(`Successfully saved: ${filepath}`);
   } catch (error) {
     console.error(`Error processing ${apiUrl}:`, error.message);
@@ -76,8 +60,13 @@ async function sleep(ms) {
 }
 
 // Main execution flow
-const processSitemap = async (sitemapUrl) => {
+const processSitemap = async (sitemapUrl, options) => {
   try {
+    // Ensure output folder exists recursively
+    if (!existsSync(options.output)) {
+      mkdirSync(options.output, { recursive: true });
+    }
+
     // Fetch and parse main sitemap
     const sitemapIndex = await fetchXMLContent(sitemapUrl);
 
@@ -92,19 +81,19 @@ const processSitemap = async (sitemapUrl) => {
 
     // Process each product URL
     const productUrls = extractProductUrls(productSitemap)
-      .map(transformProductUrl)
+      .map(url => ({
+        apiUrl: options.mode === "html" ? url : `${url}.js`,
+        filename: url.split("/").pop()
+      }))
       .filter(obj => obj.filename !== "");
 
     console.log(`Found ${productUrls.length} product URL(s).`);
+
     // Process products in parallel with concurrency limit
-    const concurrencyLimit = 3;
-    let breakLimit = 0;
-    for (let i = 0; i < productUrls.length; i += concurrencyLimit) {
-      const batch = productUrls.slice(i, i + concurrencyLimit);
-      await Promise.all(batch.map(fetchAndSaveProduct));
-      await sleep(100);
-      breakLimit++;
-      // if (breakLimit === 1) break;
+    for (let i = 0; i < productUrls.length; i += options.batchLimit) {
+      const batch = productUrls.slice(i, i + options.batchLimit);
+      await Promise.all(batch.map(product => fetchAndSaveProduct(product, options)));
+      await sleep(150);
     }
 
     console.log("All products processed successfully");
@@ -114,28 +103,37 @@ const processSitemap = async (sitemapUrl) => {
   }
 };
 
-// Export functions for potential reuse
-module.exports = {
-  processSitemap,
-  fetchXMLContent,
-  findProductSitemapUrl,
-  extractProductUrls,
-  transformProductUrl,
-  fetchAndSaveProduct
-};
-
 // Execute if run directly
-// node shopify.js "https://fusionworld.com/sitemap.xml"
-if (require.main === module) {
-  const sitemapUrl = process.argv[2] || "https://fusionworld.com/sitemap.xml";
-  if (!sitemapUrl) {
-    console.error("Please provide a sitemap URL as an argument");
-    process.exit(1);
-  }
+// node shopifySitemap.js "https://fusionworld.com/sitemap.xml" --output ./output --mode json --batch-limit 5
+if (process.argv[1] === import.meta.filename) {
+  const program = new Command();
 
-  processSitemap(sitemapUrl)
-    .catch(error => {
-      console.error("Fatal error:", error);
-      process.exit(1);
+  program
+    .name("shopifySitemap")
+    .description("Fetch and save products from Shopify sitemap")
+    .version("1.0.0")
+    .argument("<sitemapUrl>", "URL of the sitemap to process")
+    .requiredOption("-o, --output <path>", "Output directory for saved products")
+    .option("-m, --mode <mode>", "Output format: json or html", "json")
+    .option("-b, --batch-limit <number>", "Number of concurrent requests", "5")
+    .action((sitemapUrl, options) => {
+      const resolvedOptions = {
+        output: path.resolve(options.output),
+        mode: options.mode,
+        batchLimit: parseInt(options.batchLimit, 10)
+      };
+
+      if (!["json", "html"].includes(resolvedOptions.mode)) {
+        console.error("✗ Invalid mode. Use 'json' or 'html'.");
+        process.exit(1);
+      }
+
+      processSitemap(sitemapUrl, resolvedOptions)
+        .catch(error => {
+          console.error("Fatal error:", error);
+          process.exit(1);
+        });
     });
+
+  program.parse();
 }
