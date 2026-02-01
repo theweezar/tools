@@ -7,10 +7,9 @@ import * as cheerio from "cheerio";
 import { Command } from "commander";
 import header from "./header.json" with { type: "json" };
 import config from "./config.json" with { type: "json" };
-import { pathToFileURL } from "url";
 
 /**
- * Lists all .js files in the client/js folder.
+ * Lists all files in the client/js folder.
  * @param {string} resolvedPath - resolved path
  * @param {string} ext - file extension matching
  * @returns {Array} 
@@ -44,54 +43,51 @@ function readHtml(filePath) {
 }
 
 /**
+ * Change node tag name
+ * @param {cheerio.CheerioAPI} $ - The HTML content
+ * @param {cheerio.Cheerio<AnyNode>} node - Cheerio node
+ * @param {string} to - New node tag
+ */
+function changeTagName($, node, to) {
+  return $(`<${to}>`).append(node.html());
+};
+
+/**
  * Build the body description for a product
- * @param {string} html - The HTML content
+ * @param {cheerio.CheerioAPI} $ - The HTML content
  * @param {Object} product - The product object
  * @returns {string} - The HTML string for the body description
  */
-function buildBodyDescription(html, product) {
-  try {
-    const $ = cheerio.load(html);
-    /**
-     * Change node tag name
-     * @param {cheerio.Cheerio<AnyNode>} node - Cheerio node
-     * @param {string} to - New node tag
-     */
-    const changeTagName = (node, to) => {
-      const newTag = $(`<${to}>`);
-      return newTag.append(node.html());
-    };
-    const selectors = [
-      "#description .lg\\:col-span-5 .font-heading",
-      "#description .lg\\:col-span-5 .text-base",
-      "#description [data-hashchange-target=\"details-and-materials\"] h2",
-      "#description [data-hashchange-target=\"details-and-materials\"] ul",
-      "#description [data-hashchange-target=\"details-and-materials\"] ul + p"
-    ];
-    const finalHtml = selectors
-      .map((sel) => {
-        const self = $(sel);
-        const els = self.removeAttr("class").toArray();
-        if (!els || !els.length) return "";
-        if (sel.includes("font-heading")) return els.map((el) => $.html(changeTagName($(el), "h2"))).join("");
-        return els.map((el) => $.html(el)).join("");
-      })
-      .filter(Boolean)
-      .join("");
-    return finalHtml.trim() === "" ? product.description : finalHtml.trim();
-  } catch (err) {
-    console.error("build body description failed");
-    return "";
-  }
+function buildBodyDescription($, product) {
+  if (!$) return "";
+
+  const selectors = [
+    "#description .lg\\:col-span-5 .font-heading",
+    "#description .lg\\:col-span-5 .text-base",
+    "#description [data-hashchange-target=\"details-and-materials\"] h2",
+    "#description [data-hashchange-target=\"details-and-materials\"] ul",
+    "#description [data-hashchange-target=\"details-and-materials\"] ul + p"
+  ];
+  const finalHtml = selectors
+    .map((sel) => {
+      const self = $(sel);
+      const els = self.removeAttr("class").toArray();
+      if (!els || !els.length) return "";
+      if (sel.includes("font-heading")) return els.map((el) => $.html(changeTagName($, $(el), "h2"))).join("");
+      return els.map((el) => $.html(el)).join("");
+    })
+    .filter(Boolean)
+    .join("");
+  return finalHtml.trim() === "" ? product.description : finalHtml.trim();
 }
 
 /**
  * Build meta tags from HTML content
- * @param {string} html - The HTML content
+ * @param {cheerio.CheerioAPI} html - The HTML content
  * @returns {Object} - Meta tags object
  */
-function buildMetaTags(html) {
-  const $ = cheerio.load(html);
+function buildMetaTags($) {
+  if (!$) return {};
   const metaTags = {};
   $("meta").each((i, el) => {
     const nameAttr = $(el).attr("name");
@@ -130,8 +126,7 @@ function buildMainMap(headers) {
   };
 
   const has = (obj, prop) => {
-    return (obj && obj[prop] && typeof obj[prop] !== "undefined" && obj[prop] !== null);
-    // return (obj && obj[prop]);
+    return (obj && obj[prop]);
   };
 
   const splitSku = (sku) => {
@@ -148,121 +143,158 @@ function buildMainMap(headers) {
   const byHeader = (header) => {
     switch (header) {
       case "Handle":
-        return (p, isMaster) => p.handle || (p.url && p.url.split("/").pop()) || "";
+        return (p, isMaster, isMediaOnly) => {
+          return p.handle || (p.url && p.url.split("/").pop()) || "";
+        };
       case "Title":
-        return (p, isMaster) => isMaster ? (p.title || "") : "";
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
+          return isMaster ? (p.title || "") : "";
+        };
       case "Body (HTML)":
-        return (p, isMaster) => isMaster ? (buildBodyDescription(p.html, p) || p.description || "") : "";
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
+          return isMaster ? (buildBodyDescription(p.html, p) || p.description || "") : "";
+        };
       case "Vendor":
-        return (p, isMaster) => isMaster ? "FUSION" : "";
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
+          return isMaster ? "FUSION" : "";
+        };
       case "Product Category":
-        return (p, isMaster) => isMaster ? "Apparel & Accessories" : ""; // hard code to generate gender field
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
+          // hard code to generate gender field
+          return isMaster ? "Apparel & Accessories" : "";
+        };
       case "Type":
-        return (p, isMaster) => isMaster ? (p.type || "") : "";
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
+          return isMaster ? (p.type || "") : "";
+        };
       case "Tags":
-        // return (p, isMaster) => isMaster ? joinTags(p.tags) : "";
-        return (p, isMaster) => isMaster && has(p, "_tags") ? p._tags : "";
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
+          return isMaster && has(p, "_tags") ? p._tags : "";
+        };
       case "Published":
-        return (p, isMaster) => (p.published_at && isMaster ? "TRUE" : "");
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
+          return (p.published_at && isMaster ? "TRUE" : "");
+        };
       case "Option1 Name":
-        return (p, isMaster) => isMaster ? (Array.isArray(p.options) && p.options[0] && p.options[0].name) || "" : "";
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
+          return isMaster ? (Array.isArray(p.options) && p.options[0] && p.options[0].name) || "" : "";
+        };
       case "Option1 Value":
-        return (p, isMaster) => {
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
           if (isMaster) return (getFirstVariantValue(p, "option1") || "").toUpperCase();
           return (has(p, "_variant") && p._variant.option1 ? p._variant.option1 : "").toUpperCase();
         };
       case "Option1 Linked To":
         return () => "";
       case "Option2 Name":
-        return (p, isMaster) => isMaster ? (Array.isArray(p.options) && p.options[1] && p.options[1].name) || "" : "";
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
+          return isMaster ? (Array.isArray(p.options) && p.options[1] && p.options[1].name) || "" : "";
+        };
       case "Option2 Value":
-        return (p, isMaster) => {
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
           if (isMaster) return (getFirstVariantValue(p, "option2") || "").toUpperCase();
           return (has(p, "_variant") && p._variant.option2 ? p._variant.option2 : "").toUpperCase();
         };
       case "Option2 Linked To":
         return () => "";
       case "Option3 Name":
-        return (p, isMaster) => isMaster ? (Array.isArray(p.options) && p.options[2] && p.options[2].name) || "" : "";
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
+          return isMaster ? (Array.isArray(p.options) && p.options[2] && p.options[2].name) || "" : "";
+        };
       case "Option3 Value":
-        return (p, isMaster) => {
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
           if (isMaster) return (getFirstVariantValue(p, "option3") || "").toUpperCase();
           return (has(p, "_variant") && p._variant.option3 ? p._variant.option3 : "").toUpperCase();
         };
       case "Option3 Linked To":
         return () => "";
       case "Variant SKU":
-        return (p, isMaster) => {
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
           if (isMaster) return splitSku(getFirstVariantValue(p, "sku")) || "";
           if (!isMaster && has(p, "_variant")) return splitSku(p._variant.sku) || "";
           return "";
         };
       case "Variant Grams":
-        return (p, isMaster) => {
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
           if (isMaster) return (Number(getFirstVariantValue(p, "weight")) || 0);
           return (has(p, "_variant") && p._variant.weight ? Number(p._variant.weight) : 0);
         };
       case "Variant Inventory Tracker":
-        return (p, isMaster) => "shopify";
+        return (p, isMaster, isMediaOnly) => isMediaOnly ? "" : "shopify";
+      case "Variant Inventory Qty":
+        return (p, isMaster, isMediaOnly) => isMediaOnly ? "" : 0;
       case "Variant Inventory Policy":
-        return (p, isMaster) => "deny";
+        return (p, isMaster, isMediaOnly) => isMediaOnly ? "" : "deny";
       case "Variant Fulfillment Service":
-        return () => "manual";
+        return (p, isMaster, isMediaOnly) => isMediaOnly ? "" : "manual";
       case "Variant Price":
-        return (p, isMaster) => {
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
           if (!isMaster && p._variant && p._variant.price !== undefined) return fmtPrice(p._variant.price);
           return isMaster ? fmtPrice(p.price || p.price_min) : "";
         };
       case "Variant Compare At Price":
-        return (p, isMaster) => (!isMaster && p._variant ? fmtPrice(p._variant.compare_at_price) : "");
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
+          return (!isMaster && p._variant ? fmtPrice(p._variant.compare_at_price) : "");
+        };
       case "Variant Requires Shipping":
-        return (p, isMaster) => "TRUE";
+        return (p, isMaster, isMediaOnly) => isMediaOnly ? "" : "TRUE";
       case "Variant Taxable":
-        return (p, isMaster) => "FALSE";
+        return (p, isMaster, isMediaOnly) => isMediaOnly ? "" : "FALSE";
       case "Unit Price Total Measure":
       case "Unit Price Total Measure Unit":
       case "Unit Price Base Measure":
       case "Unit Price Base Measure Unit":
         return () => "";
       case "Variant Barcode":
-        return (p, isMaster) => {
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
           if (isMaster) return getFirstVariantValue(p, "barcode") || "";
           return has(p, "_variant") ? (p._variant.barcode || "") : "";
         };
       case "Image Src":
-        return (p, isMaster) => {
-          if (isMaster) {
-            const first = getFirstVariantValue(p, "featured_image");
-            return first ? first.src || "" : "";
-          }
-          return (has(p, "_variant") && p._variant.featured_image ? (p._variant.featured_image.src || "") : "");
+        return (p, isMaster, isMediaOnly) => {
+          return has(p, "_media") ? p._media.src : "";
         };
       case "Image Position":
-        return (p, isMaster) => {
-          if (isMaster) {
-            const first = getFirstVariantValue(p, "featured_image");
-            return first ? first.position || "" : "";
-          }
-          return (has(p, "_variant") && p._variant.featured_image ? (p._variant.featured_image.position || "") : "");
+        return (p, isMaster, isMediaOnly) => {
+          return has(p, "_media") ? p._media.position : "";
         };
       case "Image Alt Text":
-        return (p, isMaster) => {
-          if (isMaster) {
-            const first = getFirstVariantValue(p, "featured_image");
-            return first ? first.alt || "" : "";
-          }
-          return (has(p, "_variant") && p._variant.featured_image ? (p._variant.featured_image.alt || "") : "");
+        return (p, isMaster, isMediaOnly) => {
+          return has(p, "_media") ? p._media.alt : "";
         };
       case "Gift Card":
-        return (p, isMaster) => isMaster ? (p.gift_card ? "TRUE" : "FALSE") : "";
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
+          return isMaster ? (p.gift_card ? "TRUE" : "FALSE") : "";
+        };
       case "SEO Title":
-        return (p, isMaster) => {
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
           if (!isMaster) return "";
           const metaTags = buildMetaTags(p.html);
           return metaTags.title || "";
         };
       case "SEO Description":
-        return (p, isMaster) => {
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
           if (!isMaster) return "";
           const metaTags = buildMetaTags(p.html);
           return metaTags.description || "";
@@ -270,7 +302,8 @@ function buildMainMap(headers) {
       case "Google Shopping / Google Product Category":
         return () => "";
       case "Google Shopping / Gender":
-        return (p, isMaster) => {
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
           return isMaster && has(p, "gender") ? p.gender : "";
         };
       case "Google Shopping / Age Group":
@@ -287,7 +320,8 @@ function buildMainMap(headers) {
       case "Color (product.metafields.shopify.color-pattern)":
         return () => "";
       case "Target gender (product.metafields.shopify.target-gender)":
-        return (p, isMaster) => {
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
           return isMaster && has(p, "gender") ? p.gender : "";
         };
       case "Complementary products (product.metafields.shopify--discovery--product_recommendation.complementary_products)":
@@ -296,7 +330,8 @@ function buildMainMap(headers) {
       case "Search product boosts (product.metafields.shopify--discovery--product_search_boost.queries)":
         return () => "";
       case "Variant Image":
-        return (p, isMaster) => {
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
           if (isMaster) {
             const first = getFirstVariantValue(p, "featured_image");
             return first ? first.src || "" : "";
@@ -308,7 +343,10 @@ function buildMainMap(headers) {
       case "Cost per item":
         return () => "";
       case "Status":
-        return (p, isMaster) => isMaster ? (p.published_at ? "active" : "draft") : "";
+        return (p, isMaster, isMediaOnly) => {
+          if (isMediaOnly) return "";
+          return isMaster ? (p.published_at ? "active" : "draft") : "";
+        };
       default:
         return () => "";
     }
@@ -318,22 +356,6 @@ function buildMainMap(headers) {
     header: h,
     map: byHeader(h)
   }));
-}
-
-function buildMediaMapByID(product) {
-  const map = {};
-  if (!Array.isArray(product.media)) return map;
-  product.media.forEach(media => {
-    if (media.media_type !== "image") return;
-    map[media.id] = {
-      src: media.src,
-      preview_image: {
-        src: media.preview_image.src
-      },
-      position: media.position
-    };
-  });
-  return map;
 }
 
 function joinLowerTags(product) {
@@ -377,6 +399,12 @@ function collectTags(product) {
   return [genderTag, activityTag, otherTag].filter(Boolean).join(", ");
 }
 
+function safeImportJson(jsonPath) {
+  const rawData = readFileSync(jsonPath, "utf8");
+  const product = JSON.parse(rawData);
+  return product;
+}
+
 function processProducts(options) {
   const productFiles = listFiles(options.sourceDir, ".json");//.slice(0, 1);
   const counters = { products: 0, variants: 0 };
@@ -385,41 +413,51 @@ function processProducts(options) {
     header: mainMap.map(entry => entry.header),
     path: options.output
   });
-  const processRecord = async (record) => {
-    await csvWriter.writeRecords([record]);
-  };
 
   const processProductFiles = async () => {
     for (let i = 0; i < productFiles.length; i++) {
+      const allRows = [];
       const filePath = productFiles[i];
-      const fileURL = pathToFileURL(filePath);
-      const { default: product } = await import(fileURL, { with: { type: "json" }, });
-      const html = readHtml(filePath);
-      const mediaMap = buildMediaMapByID(product);
+      const product = safeImportJson(filePath);
+      const html = cheerio.load(readHtml(filePath));
       const gender = collectGender(product);
       const tags = collectTags(product);
-      const additional = {
+      const mediaIter = Array.from(Array.isArray(product.media) ? product.media : []).values();
+      const masterData = {
+        ...product,
+        _variant: null,
         html,
-        mediaMap,
         gender,
-        _tags: tags
+        _tags: tags,
+        _media: mediaIter.next().value
       };
-      const masterData = Object.assign({}, product, { _variant: null }, { ...additional });
       const masterRow = mainMap.map((entry) => entry.map(masterData, true));
 
       counters.products += 1;
-      await processRecord(masterRow);
+      allRows.push(masterRow);
 
-      // Variant rows
+      // Variant rows - Loop by variants, exclude first master row
       const variants = Array.isArray(product.variants) ? product.variants.slice(1) : [];
 
-      for (let j = 0; j < variants.length; j++) {
+      for (const [_, variant] of variants.entries()) {
+        const variantData = masterData;
+        variantData._variant = variant;
+        variantData._media = mediaIter.next().value;
+        const variantRow = mainMap.map((entry) => entry.map(variantData));
+        allRows.push(variantRow);
         counters.variants += 1;
-        const variant = variants[j];
-        const variantData = Object.assign({}, masterData, { _variant: variant });
-        const variantRow = mainMap.map((entry) => entry.map(variantData, false));
-        await processRecord(variantRow);
       }
+
+      for (const media of mediaIter) {
+        const mediaData = {
+          handle: masterData.handle,
+          _media: media
+        };
+        const mediaRow = mainMap.map((entry) => entry.map(mediaData, false, true));
+        allRows.push(mediaRow);
+      }
+
+      await csvWriter.writeRecords(allRows);
 
       console.log(`[${i + 1}]\tDone...${product.title}`);
     }
@@ -430,28 +468,26 @@ function processProducts(options) {
     .catch(error => console.error(error));
 }
 
-if (process.argv[1] === import.meta.filename) {
-  const program = new Command();
+const program = new Command();
 
-  program
-    .name("shopifyToCsv")
-    .description("Convert Shopify product JSON files to CSV")
-    .version("1.0.0")
-    .argument("<sourceDir>", "Source directory containing product .json files")
-    .option("-o, --output <path>", "Output path for the CSV file", "./products.csv")
-    .action((sourceDir, options) => {
-      const resolvedOptions = {
-        sourceDir: path.resolve(sourceDir),
-        output: path.resolve(options.output),
-      };
+program
+  .name("shopifyToCsv")
+  .description("Convert Shopify product JSON files to CSV")
+  .version("1.0.0")
+  .argument("<sourceDir>", "Source directory containing product data files")
+  .option("-o, --output <path>", "Output path for the CSV file", "./products.csv")
+  .action((sourceDir, options) => {
+    const resolvedOptions = {
+      sourceDir: path.resolve(sourceDir),
+      output: path.resolve(options.output),
+    };
 
-      if (!existsSync(resolvedOptions.sourceDir)) {
-        console.error(`✗ Source directory does not exist: ${resolvedOptions.sourceDir}`);
-        process.exit(1);
-      }
+    if (!existsSync(resolvedOptions.sourceDir)) {
+      console.error(`✗ Source directory does not exist: ${resolvedOptions.sourceDir}`);
+      process.exit(1);
+    }
 
-      processProducts(resolvedOptions);
-    });
+    processProducts(resolvedOptions);
+  });
 
-  program.parse();
-}
+program.parse();
