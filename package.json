@@ -8,7 +8,9 @@
     "lint": "eslint ./**/*.js",
     "lint:fix": "eslint ./**/*.js --fix",
     "build:fakerform": "bash ./extensions/faker-form/build.sh",
-    "build:cveditor": "esbuild makecv/editor.js --bundle --outfile=makecv/dist/editor.js && npx esbuild --bundle makecv/editor.css --outfile=makecv/dist/editor.css"
+    "build:cveditor": "esbuild makecv/editor.js --bundle --outfile=makecv/dist/editor.js && npx esbuild --bundle makecv/editor.css --outfile=makecv/dist/editor.css",
+    "build:imagehelper": "esbuild imagehelper/index.js --bundle --outfile=exe/imgh.cjs --platform=node",
+    "imgh": "node ./imagehelper/index.js"
   },
   "repository": {
     "type": "git",
@@ -40,6 +42,7 @@
     "@babel/core": "^7.28.6",
     "@babel/preset-env": "^7.28.6",
     "@eslint/compat": "^2.0.1",
+    "babel-plugin-transform-import-meta": "^2.3.3",
     "esbuild": "^0.27.2",
     "eslint": "^9.39.2",
     "globals": "^17.2.0",

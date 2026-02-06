@@ -1,6 +1,5 @@
 import path from "path";
 import sharp from "sharp";
-import { program } from "commander";
 import { promises as fs } from "fs";
 
 /**
@@ -129,54 +128,32 @@ const processImages = async (imagePath, outputDir, fileNamePattern, dimensions) 
   }
 };
 
-/**
- * Main CLI setup
- */
-program
-  .name("mkicon")
-  .description("Resize square icons to multiple dimensions")
-  .argument("<imagePath>", "Path to the source image file")
-  .option(
-    "-o, --output <dir>",
-    "Output directory",
-    path.resolve(process.cwd(), "output")
-  )
-  .option(
-    "-p, --pattern <pattern>",
-    "Output file name pattern",
-    "icon"
-  )
-  .option(
-    "-d, --dimensions <sizes>",
-    "Dimensions separated by comma",
-    "16,32,48,128"
-  )
-  .action(async (imagePath, options) => {
-    try {
-      // Resolve image path
-      const resolvedImagePath = path.resolve(imagePath);
+const doAction = async (imagePath, options) => {
+  try {
+    // Resolve image path
+    const resolvedImagePath = path.resolve(imagePath);
 
-      // Validate image file exists
-      await fs.access(resolvedImagePath);
+    // Validate image file exists
+    await fs.access(resolvedImagePath);
 
-      // Parse dimensions
-      const dimensions = parseDimensions(options.dimensions);
+    // Parse dimensions
+    const dimensions = parseDimensions(options.dimensions);
 
-      // Process images
-      await processImages(
-        resolvedImagePath,
-        path.resolve(options.output),
-        options.pattern,
-        dimensions
-      );
-    } catch (error) {
-      if (error.code === "ENOENT") {
-        console.error(`✗ Image file not found: ${imagePath}`);
-      } else {
-        console.error("✗ Error:", error.message);
-      }
-      process.exit(1);
+    // Process images
+    await processImages(
+      resolvedImagePath,
+      path.resolve(options.output),
+      options.pattern,
+      dimensions
+    );
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      console.error(`✗ Image file not found: ${imagePath}`);
+    } else {
+      console.error("✗ Error:", error.message);
     }
-  });
+    process.exit(1);
+  }
+};
 
-program.parse(process.argv);
+export { doAction };
