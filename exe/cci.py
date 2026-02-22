@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!python
 """
 Image concatenation utility using OpenCV.
 Arranges images in a grid layout with configurable images per row.
@@ -293,7 +293,7 @@ def concatenate_images(
     "--out-name",
     default=None,
     type=str,
-    help="Output filename (default: YYYYMMDD_{image_count}_merged.jpg)",
+    help="Output filename (default: YYYYMMDD_HHMMSS_{image_count}_merged.jpg)",
 )
 @click.option(
     "--output-size",
@@ -324,7 +324,7 @@ def main(
         max_height: Maximum height for image resizing (None for auto-calculation).
         ratio: Resize mode - "keep" or "consistency".
         out_dir: Output directory path (defaults to parent of source_dir).
-        out_name: Output filename (defaults to YYYYMMDD_{count}_merged.jpg).
+        out_name: Output filename (defaults to YYYYMMDD_HHMMSS_{count}_merged.jpg).
         output_size: Output mode - "cover" or "contain".
 
     Returns:

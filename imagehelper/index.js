@@ -1,3 +1,6 @@
+#!node
+"use strict";
+
 import path from "path";
 import { program } from "commander";
 import { doAction as doMkIconAction } from "./mkicon.js";

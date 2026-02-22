@@ -67,6 +67,14 @@ const processConversion = async (files, outputDir, targetFormat) => {
   }
 };
 
+/**
+ * Main action function for image conversion
+ * @param {string} source - Source path (directory or file)
+ * @param {Object} options - Conversion options
+ * @param {string} options.from - Source file extension
+ * @param {string} options.to - Target file extension
+ * @param {string} options.output - Output directory path
+ */
 const doAction = async (source, options) => {
   try {
     const resolvedSource = path.resolve(source);

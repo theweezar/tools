@@ -9,8 +9,7 @@
     "lint:fix": "eslint ./**/*.js --fix",
     "build:fakerform": "bash ./extensions/faker-form/build.sh",
     "build:cveditor": "esbuild makecv/editor.js --bundle --outfile=makecv/dist/editor.js && npx esbuild --bundle makecv/editor.css --outfile=makecv/dist/editor.css",
-    "build:imagehelper": "esbuild imagehelper/index.js --bundle --outfile=exe/imgh.cjs --platform=node",
-    "imgh": "node ./imagehelper/index.js"
+    "build:imagehelper": "esbuild imagehelper/index.js --bundle --outfile=exe/imgh.cjs --platform=node --minify"
   },
   "repository": {
     "type": "git",
