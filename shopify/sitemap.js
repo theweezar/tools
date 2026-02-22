@@ -4,7 +4,6 @@ import axios from "axios";
 import xml2js from "xml2js";
 import path from "path";
 import { existsSync, mkdirSync, writeFileSync } from "fs";
-import { Command } from "commander";
 import { promisify } from "util";
 
 // Convert xml2js.parseString to promise-based function
@@ -103,37 +102,21 @@ const processSitemap = async (sitemapUrl, options) => {
   }
 };
 
-// Execute if run directly
-// node shopifySitemap.js "https://fusionworld.com/sitemap.xml" --output ./output --mode json --batch-limit 5
-if (process.argv[1] === import.meta.filename) {
-  const program = new Command();
+export function doAction(sitemapUrl, options) {
+  const resolvedOptions = {
+    output: path.resolve(options.output),
+    mode: options.mode,
+    batchLimit: parseInt(options.batchLimit, 10)
+  };
 
-  program
-    .name("shopifySitemap")
-    .description("Fetch and save products from Shopify sitemap")
-    .version("1.0.0")
-    .argument("<sitemapUrl>", "URL of the sitemap to process")
-    .requiredOption("-o, --output <path>", "Output directory for saved products")
-    .option("-m, --mode <mode>", "Output format: json or html", "json")
-    .option("-b, --batch-limit <number>", "Number of concurrent requests", "5")
-    .action((sitemapUrl, options) => {
-      const resolvedOptions = {
-        output: path.resolve(options.output),
-        mode: options.mode,
-        batchLimit: parseInt(options.batchLimit, 10)
-      };
+  if (!["json", "html"].includes(resolvedOptions.mode)) {
+    console.error("✗ Invalid mode. Use 'json' or 'html'.");
+    process.exit(1);
+  }
 
-      if (!["json", "html"].includes(resolvedOptions.mode)) {
-        console.error("✗ Invalid mode. Use 'json' or 'html'.");
-        process.exit(1);
-      }
-
-      processSitemap(sitemapUrl, resolvedOptions)
-        .catch(error => {
-          console.error("Fatal error:", error);
-          process.exit(1);
-        });
+  processSitemap(sitemapUrl, resolvedOptions)
+    .catch(error => {
+      console.error("Fatal error:", error);
+      process.exit(1);
     });
-
-  program.parse();
 }

@@ -4,7 +4,6 @@ import { createArrayCsvWriter } from "csv-writer";
 import { existsSync, readdirSync, readFileSync } from "fs";
 import path from "path";
 import * as cheerio from "cheerio";
-import { Command } from "commander";
 import header from "./header.json" with { type: "json" };
 import config from "./config.json" with { type: "json" };
 
@@ -468,26 +467,16 @@ function processProducts(options) {
     .catch(error => console.error(error));
 }
 
-const program = new Command();
+export function doAction(sourceDir, options) {
+  const resolvedOptions = {
+    sourceDir: path.resolve(sourceDir),
+    output: path.resolve(options.output),
+  };
 
-program
-  .name("shopifyToCsv")
-  .description("Convert Shopify product JSON files to CSV")
-  .version("1.0.0")
-  .argument("<sourceDir>", "Source directory containing product data files")
-  .option("-o, --output <path>", "Output path for the CSV file", "./products.csv")
-  .action((sourceDir, options) => {
-    const resolvedOptions = {
-      sourceDir: path.resolve(sourceDir),
-      output: path.resolve(options.output),
-    };
+  if (!existsSync(resolvedOptions.sourceDir)) {
+    console.error(`✗ Source directory does not exist: ${resolvedOptions.sourceDir}`);
+    process.exit(1);
+  }
 
-    if (!existsSync(resolvedOptions.sourceDir)) {
-      console.error(`✗ Source directory does not exist: ${resolvedOptions.sourceDir}`);
-      process.exit(1);
-    }
-
-    processProducts(resolvedOptions);
-  });
-
-program.parse();
+  processProducts(resolvedOptions);
+}
