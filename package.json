@@ -24,6 +24,8 @@
   "dependencies": {
     "@faker-js/faker": "^10.2.0",
     "axios": "^1.13.4",
+    "browser-xml2js": "^0.4.19",
+    "browserify": "^17.0.1",
     "cheerio": "^1.2.0",
     "commander": "^14.0.2",
     "csv-writer": "^1.6.0",
@@ -46,6 +48,7 @@
     "esbuild": "^0.27.2",
     "eslint": "^9.39.2",
     "globals": "^17.2.0",
-    "terser": "^5.46.0"
+    "terser": "^5.46.0",
+    "vite": "^8.0.3"
   }
 }
